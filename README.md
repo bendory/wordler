@@ -4,12 +4,12 @@ Play and solve wordle!
 ## WordList
 WordList is just a list of words.
 
-## Dictionary
-Dictionary loads all known words from /usr/share/dict.
+## Solver
+Solver will solve your wordle for you!
 
 ## TODO
 * [ ] make wordle puzzle, give feedback on guesses
-* [ ] make solver
+* [x] make solver
 * [ ] connect wordler to solver
 * [ ] problems: /usr/share/dict does not include...
     * [ ] plurals
