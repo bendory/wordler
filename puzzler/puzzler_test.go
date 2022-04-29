@@ -139,8 +139,90 @@ func TestGuess(t *testing.T) {
 	}
 }
 
-func TestRemainingGuesses(t *testing.T) {
-	// TODO: add tests
+func TestRemaining(t *testing.T) {
+	list := []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+	p := Wordle{
+		dict:             wordlist.New(list),
+		remaining:        wordlist.New(list),
+		word:             list[len(list)-1],
+		remainingGuesses: defaultGuesses,
+		strict:           true,
+	}
+
+	// A rejected guess should not consume a remaining guess.
+	response, err := p.Guess("not in dictionary")
+	if response != "" {
+		t.Errorf("want empty string, got %v", response)
+	}
+	if err != NotInDictionaryErr {
+		t.Errorf("want %v, got %v", NotInDictionaryErr, err)
+	}
+
+	legit := list[:defaultGuesses]
+	bogus := list[defaultGuesses:]
+	if len(legit) < 1 {
+		t.Error("legit is bogus! want at least 1 item.")
+	}
+	if len(bogus) < 1 {
+		t.Error("bogus is bogus! want at least 1 item.")
+	}
+
+	for i, guess := range legit {
+		t.Run(fmt.Sprintf("legit_%d", i), func(t *testing.T) {
+			if want, got := defaultGuesses-i, p.Guesses(); want != got {
+				t.Errorf("pre-guess: want %d guesses, got %d", want, got)
+			}
+			response, err = p.Guess(guess)
+			if want, got := string(wordler.NIL), response; want != got {
+				t.Errorf("want %v, got %v", want, got)
+			}
+			if err != nil {
+				t.Errorf("want nil, got %v", err)
+			}
+			if want, got := len(list)-i-1, p.Words(); want != got {
+				t.Errorf("want %d remaining words, got %d", want, got)
+			}
+			if want, got := defaultGuesses-i-1, p.Guesses(); want != got {
+				t.Errorf("post-guess: want %d guesses, got %d", want, got)
+			}
+		})
+	}
+
+	if want, got := 0, p.Guesses(); want != got {
+		t.Errorf("want %d guesses, got %d", want, got)
+	}
+	if want, got := len(bogus), p.Words(); want != got {
+		t.Errorf("want %d remaining words, got %d", want, got)
+	}
+
+	for i, guess := range bogus {
+		t.Run(fmt.Sprintf("bogus_%d", i), func(t *testing.T) {
+			if want, got := 0, p.Guesses(); want != got {
+				t.Errorf("pre-guess: want %d guesses, got %d", want, got)
+			}
+			response, err = p.Guess(guess)
+			if want, got := "", response; want != got {
+				t.Errorf("want %v, got %v", want, got)
+			}
+			if err != OutOfGuessesErr {
+				t.Errorf("want nil, got %v", err)
+			}
+			if want, got := len(list)-len(legit), p.Words(); want != got {
+				t.Errorf("want %d remaining words, got %d", want, got)
+			}
+			if want, got := 0, p.Guesses(); want != got {
+				t.Errorf("post-guess: want %d guesses, got %d", want, got)
+			}
+		})
+	}
+
+	response, err = p.Guess("another bogus guess")
+	if response != "" {
+		t.Errorf("got response %v to bogus guess", response)
+	}
+	if want, got := OutOfGuessesErr, err; want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
 }
 
 func TestGiveUp(t *testing.T) {
