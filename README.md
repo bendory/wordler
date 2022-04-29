@@ -2,30 +2,35 @@
 Play and solve wordle!
 
 ## WordList
-WordList is just a list of words. By default, it loads the dictionary from
-`/usr/share/dict/words`, but var `wordler.Loader` can be changed to load any
-wordlist.
+WordList is just a list of words.
+
+By default, it loads the dictionary from `/usr/share/dict/words`, but var
+`wordler.Loader` can be changed to load any wordlist.
+
+`wordlist.OptimalGuess()` contains the exciting heuristic to choose the best
+next guess.
 
 ## Solver
-Solver will solve your wordle for you! The interactive solver can be used to
-solve any wordle; args allow changing word length. It always plays using the
-"hard" rules.
+Solver will solve your wordle for you!
+
+The interactive solver can be used to solve any wordle; args allow changing word
+length. It always plays using the "hard" rules.
 
 ## Puzzler
-Puzzler will run a wordle for you; solve it yourself. Args allow changing word
-length, number of guesses, and more.
+Puzzler will run a wordle for you; solve it yourself.
+
+Args allow changing word length, number of guesses, and more.
 
 ## Main
-`wordler/main` connects a Solver to a Puzzler and runs simulated worlde
+`wordler/main` connects a Solver to a Puzzler and runs simulated wordle
 interactions; it's helpful for gathering statistics on solution success rate.
 
 ## Simulator
-Simulator is for testing; it confirms that Solver and Puzzler score guesses and
+Simulator is for testing.  It confirms that Solver and Puzzler score guesses and
 use them for solving with a reciprocal approach.
 
 ## Statistics
-
-All stats are based on 1000 6-guess iterations on 5-letter worldles.
+All stats are based on 1000 6-guess iterations on 5-letter wordles.
 
 * Random guesses:
 	* 91.5% success rate
