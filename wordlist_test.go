@@ -109,10 +109,10 @@ func TestKeepOnly(t *testing.T) {
 	}
 }
 
-func TestNew(t *testing.T) {
+func TestNewWordList(t *testing.T) {
 	l := baseList[:]
 
-	w := New(l)
+	w := NewWordList(l)
 	want := &WordList{baseList}
 	if !w.Equals(want) {
 		t.Errorf("got %#v, want %#v", w, want)
@@ -126,7 +126,7 @@ func TestNew(t *testing.T) {
 	}
 
 	// Changing l should have no effect on w.
-	w = New(l)
+	w = NewWordList(l)
 	l[0] = l[0] + " bogus"
 	if !w.Equals(want) {
 		t.Errorf("got %#v, want %#v", w, want)

@@ -9,8 +9,8 @@ type WordList struct {
 	words []string
 }
 
-// New creates a new WordList containing the words in s.
-func New(s []string) *WordList {
+// NewWordList creates a new WordList containing the words in s.
+func NewWordList(s []string) *WordList {
 	return &WordList{words: s[:]} // copy s
 }
 
