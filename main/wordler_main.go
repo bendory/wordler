@@ -72,6 +72,7 @@ func main() {
 		fmt.Println()
 
 		var guess, response string
+		var guesses []string
 		for p.Guesses() > 0 {
 			if p.Words() != s.Remaining() {
 				fmt.Printf("  ERROR: %d Puzzler words != %d Solver words (continuing anyway)\n", p.Words(), s.Remaining())
@@ -86,6 +87,7 @@ func main() {
 				} else {
 					guess = s.Guess()
 				}
+				guesses = append(guesses, guess)
 				response, err = p.Guess(guess)
 				switch err {
 				case puzzler.InvalidGuessErr, puzzler.NotInDictionaryErr:
@@ -120,12 +122,13 @@ func main() {
 			count.winningIteration += float32(args.Guesses - p.Guesses())
 		} else if p.Guesses() == 0 {
 			fmt.Println("  YOU LOSE!")
+			fmt.Printf("  Guesses were: %v; %d words left.\n", strings.Join(guesses, ", "), s.Remaining())
 		}
 		fmt.Printf("  The solution is '%v'.\n", p.GiveUp())
 		fmt.Println()
 	}
 
-	count.winningIteration /= float32(count.iterations)
+	count.winningIteration /= float32(count.winners)
 	fmt.Printf("Stats gathered: %#v\n", count)
 }
 
