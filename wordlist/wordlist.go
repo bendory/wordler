@@ -5,8 +5,8 @@ import (
 	"os"
 	"reflect"
 	"regexp"
-	"strings"
 	"sync"
+	"unicode"
 )
 
 type WordList struct {
@@ -31,8 +31,15 @@ func NewDictionary() (*WordList, error) {
 		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
+	SCAN:
 		for scanner.Scan() {
-			fullDictionary = append(fullDictionary, strings.ToLower(scanner.Text()))
+			word := scanner.Text()
+			for _, c := range word {
+				if unicode.IsUpper(c) {
+					continue SCAN
+				}
+			}
+			fullDictionary = append(fullDictionary, word)
 		}
 		err = scanner.Err()
 	})
