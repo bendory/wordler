@@ -52,17 +52,9 @@ func (w *Wordle) Guess(g string) (*Response, error) {
 		return nil, err
 	}
 	w.remainingGuesses--
-	r := &Response{
-		GuessesRemaining: w.remainingGuesses,
-		Detail:           w.evaluateGuess(g),
-	}
-	r.WordsRemaining = w.remaining.Length()
+	r := &Response{GuessesRemaining: w.remainingGuesses}
 
-	return r, nil
-}
-
-func (w *Wordle) evaluateGuess(g string) string {
-	var response []rune
+	var detail []rune
 	word := w.word
 	for i, b := range g {
 		c := byte(b)
@@ -72,11 +64,18 @@ func (w *Wordle) evaluateGuess(g string) string {
 			w.remaining.KeepOnly(regexp.MustCompile(fmt.Sprintf("^%s%s", strings.Repeat(".", i), string(c))))
 		} else {
 			for j := i + 1; j < len(word); j++ {
-				if word[j] == c && g[j] != c {
-					r = wordler.ELSEWHERE
-					word = word[:j] + " " + word[j+1:] // prevent additional matches on this letter
-					w.remaining.KeepOnly(regexp.MustCompile(string(c)))
-					w.remaining.Delete(regexp.MustCompile(fmt.Sprintf("^%s[^%s]", strings.Repeat(".", i), string(c))))
+				if word[j] == c {
+					if g[j] != c {
+						r = wordler.ELSEWHERE
+						word = word[:j] + " " + word[j+1:] // prevent additional matches on this letter
+						w.remaining.KeepOnly(regexp.MustCompile(string(c)))
+						w.remaining.Delete(regexp.MustCompile(fmt.Sprintf("^%s[^%s]", strings.Repeat(".", i), string(c))))
+					} else {
+						// g[j] == c -- so ignore this letter. In code below, we
+						// will delete words containing c when r == wordler.NIL;
+						// Changing c to '_' here prevents that from happening.
+						c = '_'
+					}
 					break
 				}
 			}
@@ -85,9 +84,11 @@ func (w *Wordle) evaluateGuess(g string) string {
 				w.remaining.Delete(regexp.MustCompile(string(c)))
 			}
 		}
-		response = append(response, r)
+		detail = append(detail, r)
 	}
-	return string(response)
+	r.Detail = string(detail)
+	r.WordsRemaining = w.remaining.Length()
+	return r, nil
 }
 
 // validate guess based on strictness setting.
