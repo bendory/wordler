@@ -5,28 +5,28 @@ import (
 	"os"
 	"regexp"
 
-	"wordler/guesser"
+	"wordler/solver"
 )
 
 func main() {
-	fmt.Println("I'm a wordle guesser! I'll make guesses, you tell me wordle's response.")
-	fmt.Printf("Use '%c' for \"right letter in the right place\"\n", guesser.CORRECT)
-	fmt.Printf("Use '%c' for \"right letter in the wrong place\"\n", guesser.ELSEWHERE)
-	fmt.Printf("Use '%c' for \"letter not in the word\"\n", guesser.NIL)
+	fmt.Println("I'm a wordle solver! I'll make guesses, you tell me wordle's response.")
+	fmt.Printf("Use '%c' for \"right letter in the right place\"\n", solver.CORRECT)
+	fmt.Printf("Use '%c' for \"right letter in the wrong place\"\n", solver.ELSEWHERE)
+	fmt.Printf("Use '%c' for \"letter not in the word\"\n", solver.NIL)
 	fmt.Println("Respond with the letter 'n' by itself to tell me that my guess isn't in wordle's dictionary.")
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
-	g, err := guesser.New(guesser.KeepOnlyOption{regexp.MustCompile("^.....$")})
+	g, err := solver.New(solver.KeepOnlyOption{Exp: regexp.MustCompile("^.....$")})
 	if err != nil {
-		fmt.Printf("Failed to make a Guesser: %v\n", err)
+		fmt.Printf("Failed to make a Solver: %v\n", err)
 		os.Exit(2)
 	}
-	
+
 	for {
 		switch g.Remaining() {
 		case 0:
-			fmt.Println("ERROR: guesser is empty.")
+			fmt.Println("ERROR: solver is empty.")
 			os.Exit(1)
 
 		case 1:

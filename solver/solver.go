@@ -1,4 +1,4 @@
-package guesser
+package solver
 
 import (
 	"fmt"
@@ -15,49 +15,49 @@ const (
 
 var verbose = false
 
-// Guesser is a wordle guesser.
-type Guesser struct {
+// Solver is a wordle guesser.
+type Solver struct {
 	have map[byte]bool // letters that we know we have
 	w    *wordlist.WordList
 }
 
 // Option represents a constraint to place on the Dictionary.
 type Option interface {
-	apply(*Guesser)
+	apply(*Solver)
 }
 
-// KeepOnlyOption specifies that Guesser should only include words that match
+// KeepOnlyOption specifies that Solver should only include words that match
 // the given expression.
 type KeepOnlyOption struct {
 	Exp *regexp.Regexp
 }
 
 // apply fulfills the Option interface
-func (k KeepOnlyOption) apply(g *Guesser) {
-	g.w.KeepOnly(k.Exp)
+func (k KeepOnlyOption) apply(s *Solver) {
+	s.w.KeepOnly(k.Exp)
 }
 
-// DeleteOption specifies that Guesser should exclude words that match
+// DeleteOption specifies that Solver should exclude words that match
 // the given expression.
 type DeleteOption struct {
 	Exp *regexp.Regexp
 }
 
 // apply fulfills the Option interface
-func (d DeleteOption) apply(g *Guesser) {
-	g.w.Delete(d.Exp)
+func (d DeleteOption) apply(s *Solver) {
+	s.w.Delete(d.Exp)
 }
 
-// New returns a new Guesser populated with a Dictionary.
-func New(options ...Option) (*Guesser, error) {
+// New returns a new Solver populated with a Dictionary.
+func New(options ...Option) (*Solver, error) {
 	var (
-		g   *Guesser
+		g   *Solver
 		w   *wordlist.WordList
 		err error
 	)
 
 	if w, err = wordlist.NewDictionary(); err == nil {
-		g = &Guesser{
+		g = &Solver{
 			have: make(map[byte]bool),
 			w:    w,
 		}
@@ -71,18 +71,18 @@ func New(options ...Option) (*Guesser, error) {
 }
 
 // Guess provides a random guess from remaining words
-func (g *Guesser) Guess() string {
-	return g.w.Random()
+func (s *Solver) Guess() string {
+	return s.w.Random()
 }
 
 // React "reacts" to the scored guess by filtering out excluded words from our
 // WordList.
-func (g *Guesser) React(guess, response string) {
+func (s *Solver) React(guess, response string) {
 	if len(guess) != len(response) {
 		panic(fmt.Sprintf("guess len(%v)==%d; response len(%v) == %d", guess, len(guess), response, len(response)))
 	}
-	if g.have == nil {
-		g.have = make(map[byte]bool)
+	if s.have == nil {
+		s.have = make(map[byte]bool)
 	}
 
 	matches := 0
@@ -95,17 +95,17 @@ func (g *Guesser) React(guess, response string) {
 		case CORRECT:
 			matches++
 			keepOnly += string(c)
-			g.have[c] = true
+			s.have[c] = true
 
 		case ELSEWHERE:
 			keepOnly += "[^" + string(c) + "]"
-			g.w.KeepOnly(regexp.MustCompile(string(c)))
-			g.have[c] = true
+			s.w.KeepOnly(regexp.MustCompile(string(c)))
+			s.have[c] = true
 
 		case NIL:
 			keepOnly += "[^" + string(c) + "]"
-			if !g.have[c] {
-				g.w.Delete(regexp.MustCompile(string(c)))
+			if !s.have[c] {
+				s.w.Delete(regexp.MustCompile(string(c)))
 			}
 		}
 	}
@@ -113,20 +113,20 @@ func (g *Guesser) React(guess, response string) {
 	debug("found %d matches", matches)
 	if matches == len(guess) {
 		// complete match!
-		g.w = wordlist.New([]string{guess})
+		s.w = wordlist.New([]string{guess})
 	} else {
 		keepOnly += "$"
 		debug("keepOnly: '%v'", keepOnly)
-		g.w.KeepOnly(regexp.MustCompile(keepOnly))
+		s.w.KeepOnly(regexp.MustCompile(keepOnly))
 	}
 }
 
 // Remaining returns the number of word remaining for guessing.
-func (g *Guesser) Remaining() int {
-	if g == nil || g.w == nil {
+func (s *Solver) Remaining() int {
+	if s == nil || s.w == nil {
 		return 0
 	}
-	return g.w.Length()
+	return s.w.Length()
 }
 
 func debug(f string, args ...interface{}) {
