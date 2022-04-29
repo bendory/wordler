@@ -226,7 +226,46 @@ func TestRemaining(t *testing.T) {
 }
 
 func TestGiveUp(t *testing.T) {
-	// TODO: add tests
+	list := []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+	p := Wordle{
+		dict:             wordlist.New(list),
+		remaining:        wordlist.New(list),
+		word:             list[0],
+		remainingGuesses: defaultGuesses,
+	}
+
+	if want, got := defaultGuesses, p.Guesses(); want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
+	if want, got := len(list), p.Words(); want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
+	response, err := p.Guess(list[1])
+	if want, got := string(wordler.NIL), response; want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
+	if err != nil {
+		t.Errorf("want nil, got %v", err)
+	}
+
+	// Now GiveUp().
+	if want, got := p.word, p.GiveUp(); want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
+	if want, got := 0, p.Guesses(); want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
+	if want, got := 1, p.Words(); want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
+
+	response, err = p.Guess(list[1])
+	if response != "" {
+		t.Errorf("want empty string, got %v", response)
+	}
+	if want, got := OutOfGuessesErr, err; want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
 }
 
 func TestNilWordle(t *testing.T) {
