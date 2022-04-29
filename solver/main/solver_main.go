@@ -11,10 +11,9 @@ import (
 	"wordler/wordlist"
 )
 
-const wordLength = 5
-
 func main() {
 	fmt.Println("I'm a wordle solver! I'll make guesses, you tell me wordle's response.")
+	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", wordler.WORD_LENGTH)
 	fmt.Printf("Use '%c' for \"right letter in the right place\"\n", wordler.CORRECT)
 	fmt.Printf("Use '%c' for \"right letter in the wrong place\"\n", wordler.ELSEWHERE)
 	fmt.Printf("Use '%c' for \"letter not in the word\"\n", wordler.NIL)
@@ -22,7 +21,7 @@ func main() {
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
-	g, err := solver.New(wordlist.KeepOnlyOption{Exp: regexp.MustCompile("^" + strings.Repeat(".", wordLength) + "$")})
+	g, err := solver.New(wordlist.KeepOnlyOption{Exp: regexp.MustCompile("^" + strings.Repeat(".", wordler.WORD_LENGTH) + "$")})
 
 	if err != nil {
 		fmt.Printf("Failed to make a Solver: %v\n", err)
