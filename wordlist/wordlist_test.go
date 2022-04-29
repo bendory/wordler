@@ -141,11 +141,22 @@ func TestNew(t *testing.T) {
 func TestDictionary(t *testing.T) {
 	d, err := NewDictionary()
 	if err != nil {
-		t.Fatalf("Failed to load dictionary: %v", err)
+		t.Errorf("Failed to load dictionary: %v", err)
 	}
-
 	if d.Length() < 10000 {
 		t.Errorf("Dictionary looks small: only found %d words.", d.Length())
+	}
+
+	d, err = NewDictionary(KeepOnlyOption{regexp.MustCompile("^i$")})
+	if err != nil {
+		t.Errorf("Failed to load dictionary: %v", err)
+	}
+	if d.Length() != 1 {
+		t.Errorf("Dictionary looks small: only found %d words.", d.Length())
+	}
+	want := New([]string{"i"})
+	if !want.Equals(d) {
+		t.Errorf("want %#v != got %#v", want, d)
 	}
 }
 
@@ -160,5 +171,40 @@ func TestContains(t *testing.T) {
 	}
 	if d.Contains("not a word") {
 		t.Errorf("Dictionary contains 'not a word'.")
+	}
+}
+
+func TestOptions(t *testing.T) {
+	baselist := []string{"a", "ab", "abc"}
+	cases := []struct {
+		desc     string
+		baselist []string
+		options  []Option
+		want     *WordList
+	}{
+		{"K1", baselist, []Option{KeepOnlyOption{regexp.MustCompile("^..$")}}, New([]string{"ab"})},
+		{"D1", baselist, []Option{DeleteOption{regexp.MustCompile("^.$")}}, New([]string{"ab", "abc"})},
+		{"D2", baselist, []Option{DeleteOption{regexp.MustCompile("b")}}, New([]string{"a"})},
+		{"K2", baselist, []Option{KeepOnlyOption{regexp.MustCompile("c$")}}, New([]string{"abc"})},
+		{
+			"KD",
+			baselist,
+			[]Option{KeepOnlyOption{regexp.MustCompile("..")}, DeleteOption{regexp.MustCompile("c$")}},
+			New([]string{"ab"}),
+		}, {
+			"DD",
+			baselist,
+			[]Option{DeleteOption{regexp.MustCompile("^..$")}, DeleteOption{regexp.MustCompile("^a$")}},
+			New([]string{"abc"}),
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.desc, func(t *testing.T) {
+			got := New(c.baselist, c.options...)
+			if !got.Equals(c.want) {
+				t.Errorf("want %#v; got %#v", c.want, got)
+			}
+		})
 	}
 }

@@ -21,7 +21,7 @@ var (
 
 // NewDictionary returns a *WordList containing /usr/share/dict/words.
 // TODO: make this platform-independent via goos.Is*
-func NewDictionary() (*WordList, error) {
+func NewDictionary(options ...Option) (*WordList, error) {
 	once.Do(func() {
 		var file *os.File
 		file, err = os.Open(`/usr/share/dict/words`)
@@ -43,16 +43,20 @@ func NewDictionary() (*WordList, error) {
 		}
 		err = scanner.Err()
 	})
-	return New(fullDictionary), err
+	return New(fullDictionary, options...), err
 }
 
 // New creates a new WordList containing the words in s.
-func New(s []string) *WordList {
+func New(s []string, options ...Option) *WordList {
 	m := make(map[string]bool)
 	for _, word := range s {
 		m[word] = true
 	}
-	return &WordList{m}
+	w := &WordList{m}
+	for _, o := range options {
+		o.apply(w)
+	}
+	return w
 }
 
 // Equals compares two WordLists and returns true if they contain the same
@@ -118,4 +122,31 @@ func (w *WordList) Random() string {
 		}
 	}
 	return ""
+}
+
+// Option represents a constraint to place on a WordList.
+type Option interface {
+	apply(*WordList)
+}
+
+// KeepOnlyOption specifies that Solver should only include words that match
+// the given expression.
+type KeepOnlyOption struct {
+	Exp *regexp.Regexp
+}
+
+// apply fulfills the Option interface
+func (k KeepOnlyOption) apply(w *WordList) {
+	w.KeepOnly(k.Exp)
+}
+
+// DeleteOption specifies that Solver should exclude words that match
+// the given expression.
+type DeleteOption struct {
+	Exp *regexp.Regexp
+}
+
+// apply fulfills the Option interface
+func (d DeleteOption) apply(w *WordList) {
+	w.Delete(d.Exp)
 }

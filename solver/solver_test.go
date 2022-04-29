@@ -16,7 +16,7 @@ func TestNew(t *testing.T) {
 		t.Errorf("Only found %d words in initial list.", s.Remaining())
 	}
 
-	s, err = New(KeepOnlyOption{regexp.MustCompile("^smile$")})
+	s, err = New(wordlist.KeepOnlyOption{Exp: regexp.MustCompile("^smile$")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestNew(t *testing.T) {
 		t.Errorf("Smile! Found %d words.", s.Remaining())
 	}
 
-	s, err = New(DeleteOption{regexp.MustCompile("..")})
+	s, err = New(wordlist.DeleteOption{Exp: regexp.MustCompile("..")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,7 +32,7 @@ func TestNew(t *testing.T) {
 		t.Errorf("Found %d 1-letter dictionary entries.", s.Remaining())
 	}
 
-	s, err = New(DeleteOption{regexp.MustCompile("..")}, KeepOnlyOption{regexp.MustCompile("..")})
+	s, err = New(wordlist.DeleteOption{Exp: regexp.MustCompile("..")}, wordlist.KeepOnlyOption{Exp: regexp.MustCompile("..")})
 	if err != nil {
 		t.Fatal(err)
 	}

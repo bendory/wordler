@@ -21,50 +21,19 @@ type Solver struct {
 	w    *wordlist.WordList
 }
 
-// Option represents a constraint to place on the Dictionary.
-type Option interface {
-	apply(*Solver)
-}
-
-// KeepOnlyOption specifies that Solver should only include words that match
-// the given expression.
-type KeepOnlyOption struct {
-	Exp *regexp.Regexp
-}
-
-// apply fulfills the Option interface
-func (k KeepOnlyOption) apply(s *Solver) {
-	s.w.KeepOnly(k.Exp)
-}
-
-// DeleteOption specifies that Solver should exclude words that match
-// the given expression.
-type DeleteOption struct {
-	Exp *regexp.Regexp
-}
-
-// apply fulfills the Option interface
-func (d DeleteOption) apply(s *Solver) {
-	s.w.Delete(d.Exp)
-}
-
 // New returns a new Solver populated with a Dictionary.
-func New(options ...Option) (*Solver, error) {
+func New(options ...wordlist.Option) (*Solver, error) {
 	var (
 		g   *Solver
 		w   *wordlist.WordList
 		err error
 	)
 
-	if w, err = wordlist.NewDictionary(); err == nil {
+	if w, err = wordlist.NewDictionary(options...); err == nil {
 		g = &Solver{
 			have: make(map[byte]bool),
 			w:    w,
 		}
-	}
-
-	for _, o := range options {
-		o.apply(g)
 	}
 
 	return g, err
