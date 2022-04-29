@@ -13,15 +13,19 @@ type WordList struct {
 	words map[string]bool
 }
 
-var loader dictionaryLoader = &platformLoader{}
+// Loader is the DictionaryLoader; it is an exported variable so that tests can
+// provide a platform-independent substitution.
+var Loader DictionaryLoader = &platformLoader{}
 
 // NewDictionary returns a *WordList containing /usr/share/dict/words.
 func NewDictionary(options ...Option) (*WordList, error) {
-	return loader.load(options...)
+	return Loader.Load(options...)
 }
 
-type dictionaryLoader interface {
-	load(options ...Option) (*WordList, error)
+// DictionaryLoader is the interface for loading the dictionary into a WordList.
+type DictionaryLoader interface {
+	// Load loads the dictionary, filtered via the given options.
+	Load(options ...Option) (*WordList, error)
 }
 
 // platformLoader loads dictionary on this platform.
@@ -32,7 +36,7 @@ type platformLoader struct {
 }
 
 // TODO: make this platform-independent via goos.Is*
-func (p *platformLoader) load(options ...Option) (*WordList, error) {
+func (p *platformLoader) Load(options ...Option) (*WordList, error) {
 	p.once.Do(func() {
 		var file *os.File
 		file, p.err = os.Open(`/usr/share/dict/words`)
