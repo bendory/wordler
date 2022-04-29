@@ -40,9 +40,9 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
 	* Average guesses to win: 4.91 guesses
 	* This is *worse than random* because words with repeated common letters
 	  become optimal -- the first guess is always 'arara', which only includes 2
-	  letters!
+	  letters! (The second guess was often 'neese' which is also awful.)
 * Optimize based on most-new-letters-in-guess followed by heaviest
-  weighted-averge letter frequency:
+  weighted-average letter frequency:
 	* 96.0% success rate
 	* Average guesses to win: 4.21 guesses
 
