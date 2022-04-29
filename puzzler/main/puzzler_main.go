@@ -13,17 +13,18 @@ import (
 func main() {
 	args := &puzzler.Args{}
 	flag.BoolVar(&args.Hard, "hard", true, "use hard rules: 'Any revealed hints must be used in subsequent guesses'")
-	flag.IntVar(&args.WordLength, "length", 5, "word length")
-	flag.IntVar(&args.Guesses, "guesses", 6, "number of guesses allowed")
+	flag.IntVar(&args.WordLength, "length", wordler.DEFAULT_WORD_LENGTH, "word length")
+	flag.IntVar(&args.Guesses, "guesses", wordler.DEFAULT_GUESSES, "number of guesses allowed")
 	flag.StringVar(&args.Solution, "solution", "", "puzzler will use the specified solution")
 	flag.Parse()
 
 	fmt.Println("I'm a wordle puzzle! You make guesses, I'll score them.")
-	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", wordler.DEFAULT_WORD_LENGTH)
+	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", args.WordLength)
 	fmt.Printf("I'll use '%c' for \"right letter in the right place\"\n", wordler.CORRECT)
 	fmt.Printf("I'll use '%c' for \"right letter in the wrong place\"\n", wordler.ELSEWHERE)
 	fmt.Printf("I'll use '%c' for \"letter not in the word\"\n", wordler.NIL)
 	fmt.Println("I'll respond with the letter 'n' by itself if your guess isn't in wordle's dictionary.")
+	fmt.Printf("You've got %d guesses.\n", args.Guesses)
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
