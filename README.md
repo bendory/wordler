@@ -14,7 +14,7 @@ Puzzler will run a wordle for you.
 * [x] make wordle puzzle, give feedback on guesses
 * [x] make solver
     * [ ] optimize solver
-* [ ] connect wordler to solver
+* [ ] connect puzzler to solver
 * [ ] problems: /usr/share/dict does not include...
     * [ ] plurals
 	* [ ] fewer
