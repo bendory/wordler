@@ -45,14 +45,19 @@ func main() {
 			guess := g.Guess()
 			fmt.Println("Guess: " + guess)
 
-			for response := ""; response != "n" && len(response) != wordLength; {
+			for done := false; !done; {
+				var response string
 				fmt.Print("Response? ")
 				fmt.Scan(&response)
 
 				if response == "n" {
 					g.NotInWordle(guess)
+					done = true
 				} else if err := g.React(guess, response); err != nil {
 					fmt.Println("ERROR: ", err)
+					fmt.Printf("Guess was \"%v\"\n", guess)
+				} else {
+					done = true
 				}
 			}
 			fmt.Println()
