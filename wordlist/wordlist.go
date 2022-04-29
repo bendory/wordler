@@ -158,7 +158,7 @@ func (w *WordList) OptimalGuess() string {
 
 	// identify the most diverse / heaviest word
 	var (
-		heaviest string
+		heaviest         string
 		max, mostDiverse int
 	)
 	for word, _ := range w.words {
