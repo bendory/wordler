@@ -139,6 +139,36 @@ func (w *WordList) Random() string {
 	return ""
 }
 
+// OptimalGuess returns the best guess from this WordList.
+// The best guess:
+// - uses the most common letters based on letter frequency of words in the list
+// - returns a word with the heaviest weighted-average letter frequency
+//
+// TODO: avoid words with double-letters when choosing the word to return
+func (w *WordList) OptimalGuess() string {
+	// count letter frequencies
+	counts := make(map[int32]int)
+	for word, _ := range w.words {
+		for _, c := range word {
+			counts[c] = counts[c] + 1
+		}
+	}
+
+	// identify a heaviest word
+	heaviest, max := "", 0
+	for word, _ := range w.words {
+		weight := 0
+		for _, c := range word {
+			weight += counts[c]
+		}
+		if weight > max {
+			heaviest = word
+			max = weight
+		}
+	}
+	return heaviest
+}
+
 // Option represents a constraint to place on a WordList.
 type Option interface {
 	apply(*WordList)

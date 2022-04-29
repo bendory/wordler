@@ -228,3 +228,23 @@ func TestOptions(t *testing.T) {
 		})
 	}
 }
+
+func TestOptimalGuess(t *testing.T) {
+	cases := []struct {
+		list []string
+		want string
+	}{
+		{[]string{"aaa", "bcd"}, "aaa"},
+		{[]string{"bcd", "aaa"}, "aaa"},
+		{[]string{"aaa", "bcd", "def", "hij", "cic", "ccc"}, "ccc"},
+	}
+
+	for _, c := range cases {
+		t.Run(c.want, func(t *testing.T) {
+			w := New(c.list)
+			if want, got := c.want, w.OptimalGuess(); want != got {
+				t.Errorf("want %v; got %v", want, got)
+			}
+		})
+	}
+}
