@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"wordler/solver"
 )
+
+const wordLength = 5
 
 func main() {
 	fmt.Println("I'm a wordle solver! I'll make guesses, you tell me wordle's response.")
@@ -17,7 +20,8 @@ func main() {
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
-	g, err := solver.New(solver.KeepOnlyOption{Exp: regexp.MustCompile("^.....$")})
+	g, err := solver.New(solver.KeepOnlyOption{Exp: regexp.MustCompile("^" + strings.Repeat(".", wordLength) + "$")})
+
 	if err != nil {
 		fmt.Printf("Failed to make a Solver: %v\n", err)
 		os.Exit(2)
@@ -35,13 +39,21 @@ func main() {
 
 		default:
 			fmt.Printf("I've got %d possible words left.\n", g.Remaining())
-			var response string
+
 			guess := g.Guess()
 			fmt.Println("Guess: " + guess)
-			fmt.Print("Response? ")
-			fmt.Scan(&response)
-			if response != "n" {
-				g.React(guess, response)
+
+			for response := ""; response != "n" && len(response) != wordLength; {
+				fmt.Print("Response? ")
+				fmt.Scan(&response)
+
+				if response == "n" {
+					g.NotInWordle(guess)
+				} else if len(response) != wordLength {
+					fmt.Printf("invalid response %v; response needs exactly %d characters\n", response, wordLength)
+				} else {
+					g.React(guess, response)
+				}
 			}
 			fmt.Println()
 		}
