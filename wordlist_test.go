@@ -5,31 +5,74 @@ import (
 	"testing"
 )
 
-func TestFilter(t *testing.T) {
-	w := WordList{"foo", "bar", "bam", "zoo"}
+var baseList = []string{"foo", "bar", "bam", "zoo"}
 
+func TestLength(t *testing.T) {
+	cases := []struct {
+		w *WordList
+		l int
+	}{
+		{&WordList{}, 0},
+		{nil, 0},
+		{&WordList{baseList}, len(baseList)},
+		{&WordList{baseList}, len(baseList)},
+		{&WordList{nil}, 0},
+		{&WordList{[]string{}}, 0},
+	}
+
+	for _, c := range cases {
+		if got, want := c.w.Length(), c.l; got != want {
+			t.Errorf("%#v: got %d, want %d", c.w, got, want)
+		}
+	}
+}
+
+func TestEquals(t *testing.T) {
+	cases := []struct{
+		left, right *WordList
+		want bool
+	}{
+		{nil, nil, true},
+		{nil, &WordList{}, false},
+		{nil, &WordList{baseList}, false},
+		{&WordList{baseList}, &WordList{baseList}, true},
+		{&WordList{baseList}, &WordList{[]string{"foo"}}, false},
+	}
+
+	for _, c := range cases {
+		if got, want := c.left.Equals(c.right), c.want; got != want {
+			t.Errorf("got %t, want %t: %#v <=> %#v", got, want, c.left, c.right)
+		}
+		if got, want := c.right.Equals(c.left), c.want; got != want {
+			t.Errorf("got %t, want %t: %#v <=> %#v", got, want, c.right, c.left)
+		}
+	}
+}
+
+func TestFilter(t *testing.T) {
 	cases := []struct {
 		filter string
 		want   WordList
 	}{
-		{".oo", []string{"bam", "bar"}},
-		{"ba", []string{"foo", "zoo"}},
-		{"....", w},
-		{"...", []string{}},
+		{".oo", WordList{[]string{"bam", "bar"}}},
+		{"ba", WordList{[]string{"foo", "zoo"}}},
+		{"....", WordList{baseList}},
+		{"...", WordList{[]string{}}},
+		{"", WordList{}},
+		{"nomatch", WordList{baseList}},
 	}
 
 	for _, c := range cases {
 		t.Run(c.filter, func(t *testing.T) {
-			r := regexp.MustCompile(c.filter)
-			got := w.Filter(r)
+			w := &WordList{baseList}
+			w.Delete(regexp.MustCompile(c.filter))
 
-			if gotLen, wantLen := len(got), len(c.want); gotLen != wantLen {
-				t.Fatalf("%d != %d: got %#v, want %#v", gotLen, wantLen, got, c.want)
+			if got, want := w.Length(), c.want.Length(); got != want {
+				t.Fatalf("got %d words %#v, want %d %#v", got, w, want, c.want)
 			}
-			for i, gotItem := range got {
-				if wantItem := c.want[i]; gotItem != wantItem {
-					t.Errorf("[%d]: got %v, want %v", i, gotItem, wantItem)
-				}
+
+			if !w.Equals(&c.want) {
+				t.Errorf("got %#v, want %#v", w, c.want)
 			}
 		})
 	}
