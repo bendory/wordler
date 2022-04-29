@@ -234,8 +234,12 @@ func TestOptimalGuess(t *testing.T) {
 		list []string
 		want string
 	}{
-		{[]string{"aaa", "bcd"}, "bcd"},
-		{[]string{"bcd", "aaa"}, "bcd"},
+		{[]string{"a", "a", "b"}, "a"},
+		{[]string{"ab", "bb", "bc", "cc", "da", "dc"}, "bc"},
+		{[]string{"aaa", "bcd"}, "bcd"},        // Choose diversity.
+		{[]string{"bcd", "aaa"}, "bcd"},        // Choose diversity.
+		{[]string{"aab", "abc"}, "abc"},        // Choose diversity.
+		{[]string{"aab", "abc", "def"}, "abc"}, // Choose diversity + highest weighted average.
 		{[]string{"aaa", "bcd", "def", "hij", "cic", "ccc"}, "bcd"},
 	}
 
