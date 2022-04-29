@@ -19,7 +19,7 @@ func NewWordList(s []string) *WordList {
 }
 
 // Equals compares two WordLists and returns true if they contain the same
-// words. Note that comparison is independent of order.
+// words.
 func (this *WordList) Equals(that *WordList) bool {
 	switch {
 	case this == nil:
