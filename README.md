@@ -58,7 +58,7 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
     * [x] gather statistics on iterations
 	* [ ] There's a resource leak somewhere in `wordler/main` such that it slows
 	  as it iterates. Find and fix that!
-* [ ] problems: `/usr/share/dict` does not include...
+* [ ] problems: `/usr/share/dict` on Mac does not include...
     * [ ] plurals
 	* [ ] fewer
 	* [ ] heist
