@@ -90,6 +90,7 @@ func (w *Wordle) Guess(g string) (string, error) {
 	// - remaining letters are scored NIL
 	// As we score, we transform guess g into the returned score.
 	// As we score, we delete letters from word to prevent double-scoring.
+	lettersFound := make(map[byte]bool)
 
 	// First score all the letters in the CORRECT place.
 	for i, b := range g {
@@ -98,38 +99,43 @@ func (w *Wordle) Guess(g string) (string, error) {
 			g = g[:i] + string(wordler.CORRECT) + g[i+1:]
 			word = word[:] + string(wordler.CORRECT) + word[i+1:] // prevent additional matches on this letter
 			w.remaining.KeepOnly(regexp.MustCompile(fmt.Sprintf("^%s%s", strings.Repeat(".", i), string(c))))
+			lettersFound[c] = true
 		}
 	}
 
 	// Now score all the letters that appear ELSEWHERE in word.
-	for i, b := range g {
+	for i, b := range g { // i is the letter's position in g
 		c := byte(b)
 		if c == wordler.CORRECT {
 			continue
 		}
 
-		for j, b := range word {
+		for j, b := range word { // j is the position we are comparing in word
 			l := byte(b)
 			if j == i || l == wordler.CORRECT || l == wordler.ELSEWHERE {
 				continue
 			}
-			if l == c {
+			if l == c { // if l in word matches c in guess
 				g = g[:i] + string(wordler.ELSEWHERE) + g[i+1:]
 				word = word[:j] + string(wordler.ELSEWHERE) + word[j+1:] // prevent additional matches on this letter
 				debug("keeping only words containing '%c'", c)
 				w.remaining.KeepOnly(regexp.MustCompile(string(c)))
 				debug("%d words left.", w.remaining.Length())
-				debug("deleting all words with '%c' as char %d", c, j)
-				w.remaining.Delete(regexp.MustCompile(fmt.Sprintf("^%s[^%s]", strings.Repeat(".", j), string(c))))
+				pattern := fmt.Sprintf("^%s%s", strings.Repeat(".", i), string(c))
+				debug("deleting all words with '%c' as char %d by using regexp '%v'", c, i+1, pattern)
+				w.remaining.Delete(regexp.MustCompile(pattern))
 				debug("%d words left.", w.remaining.Length())
+				lettersFound[c] = true
 				break
 			}
 		}
 
 		if g[i] != wordler.ELSEWHERE {
 			g = g[:i] + string(wordler.NIL) + g[i+1:]
-			debug("deleting all words containing '%c'", c)
-			w.remaining.Delete(regexp.MustCompile(string(c)))
+			if !lettersFound[c] {
+				debug("deleting all words containing '%c'", c)
+				w.remaining.Delete(regexp.MustCompile(string(c)))
+			}
 			debug("%d words left.", w.remaining.Length())
 		}
 	}

@@ -316,3 +316,68 @@ func TestSolution(t *testing.T) {
 		t.Errorf("error: %v", err)
 	}
 }
+
+func TestElsewhere(t *testing.T) {
+	// This test case came from a bug found in an actual run.
+	guess, word := "dreamt", "machin"
+	list := []string{guess, word, "ambush"}
+	p := Wordle{
+		dict:             wordlist.New(list),
+		remaining:        wordlist.New(list),
+		word:             word,
+		remainingGuesses: wordler.DEFAULT_GUESSES,
+	}
+
+	response, err := p.Guess(guess)
+	if err != nil {
+		t.Errorf("want nil, got %v", err)
+	}
+	if want, got := string([]byte{wordler.NIL, wordler.NIL, wordler.NIL, wordler.ELSEWHERE, wordler.ELSEWHERE, wordler.NIL}), response; want != got {
+		t.Errorf("want %v, got %v", want, got)
+	}
+	if want, got := 2, p.Words(); want != got {
+		t.Errorf("want %d words remaining, got %d", want, got)
+	}
+}
+
+func TestDoubleLetters(t *testing.T) {
+	// This test case came from a bug found in an actual run.
+	guesses := []string{"huffle", "whimmy"}
+	word := "machin"
+
+	cases := []struct {
+		guess, response string
+		remaining       int
+	}{{
+		guess:     guesses[0],
+		response:  string([]byte{wordler.ELSEWHERE, wordler.NIL, wordler.NIL, wordler.NIL, wordler.NIL, wordler.NIL}),
+		remaining: 2,
+	}, {
+		guess:     guesses[1],
+		response:  string([]byte{wordler.NIL, wordler.ELSEWHERE, wordler.ELSEWHERE, wordler.ELSEWHERE, wordler.NIL, wordler.NIL}),
+		remaining: 1,
+	}}
+	list := append(guesses, word)
+
+	p := Wordle{
+		dict:             wordlist.New(list),
+		remaining:        wordlist.New(list),
+		word:             word,
+		remainingGuesses: wordler.DEFAULT_GUESSES,
+	}
+
+	for _, c := range cases {
+		t.Run(c.guess, func(t *testing.T) {
+			response, err := p.Guess(c.guess)
+			if err != nil {
+				t.Errorf("want nil, got %v", err)
+			}
+			if want, got := c.response, response; want != got {
+				t.Errorf("want %v, got %v", want, got)
+			}
+			if want, got := c.remaining, p.Words(); want != got {
+				t.Errorf("want %d words remaining, got %d", want, got)
+			}
+		})
+	}
+}
