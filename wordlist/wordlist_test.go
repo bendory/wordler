@@ -234,9 +234,9 @@ func TestOptimalGuess(t *testing.T) {
 		list []string
 		want string
 	}{
-		{[]string{"aaa", "bcd"}, "aaa"},
-		{[]string{"bcd", "aaa"}, "aaa"},
-		{[]string{"aaa", "bcd", "def", "hij", "cic", "ccc"}, "ccc"},
+		{[]string{"aaa", "bcd"}, "bcd"},
+		{[]string{"bcd", "aaa"}, "bcd"},
+		{[]string{"aaa", "bcd", "def", "hij", "cic", "ccc"}, "bcd"},
 	}
 
 	for _, c := range cases {
