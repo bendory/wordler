@@ -18,8 +18,35 @@ type Guesser struct {
 	w *wordlist.WordList
 }
 
+// Option represents a constraint to place on the Dictionary.
+type Option interface {
+	apply(*Guesser)
+}
+
+// KeepOnlyOption specifies that Guesser should only include words that match
+// the given expression.
+type KeepOnlyOption struct {
+	Exp *regexp.Regexp
+}
+
+// apply fulfills the Option interface
+func (k KeepOnlyOption) apply(g *Guesser) {
+	g.w.KeepOnly(k.Exp)
+}
+
+// DeleteOption specifies that Guesser should exclude words that match
+// the given expression.
+type DeleteOption struct {
+	Exp *regexp.Regexp
+}
+
+// apply fulfills the Option interface
+func (d DeleteOption) apply(g *Guesser) {
+	g.w.Delete(d.Exp)
+}
+
 // New returns a new Guesser populated with a Dictionary.
-func New() (*Guesser, error) {
+func New(options ...Option) (*Guesser, error) {
 	var (
 		g   *Guesser
 		w   *wordlist.WordList
@@ -29,6 +56,11 @@ func New() (*Guesser, error) {
 	if w, err = wordlist.NewDictionary(); err == nil {
 		g = &Guesser{w: w}
 	}
+
+	for _, o := range options {
+		o.apply(g)
+	}
+
 	return g, err
 }
 

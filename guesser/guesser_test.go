@@ -1,6 +1,7 @@
 package guesser
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
@@ -14,9 +15,32 @@ func TestNew(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if g.Remaining() == 0 {
+		t.Errorf("Only found %d words in initial list.", g.Remaining())
+	}
 
-	if g.w.Length() == 0 {
-		t.Errorf("Only found %d words in initial list.", g.w.Length())
+	g, err = New(KeepOnlyOption{regexp.MustCompile("^smile$")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.Remaining() != 1 {
+		t.Errorf("Smile! Found %d words.", g.Remaining())
+	}
+
+	g, err = New(DeleteOption{regexp.MustCompile("..")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.Remaining() != 26 {
+		t.Errorf("Found %d 1-letter dictionary entries.", g.Remaining())
+	}
+
+	g, err = New(DeleteOption{regexp.MustCompile("..")}, KeepOnlyOption{regexp.MustCompile("..")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.Remaining() != 0 {
+		t.Errorf("Found %d dictionary entries that are and are not 2 letter.", g.Remaining())
 	}
 }
 
