@@ -3,6 +3,7 @@ package wordler
 import (
 	"errors"
 
+	"wordler"
 	"wordler/wordlist"
 )
 
@@ -37,15 +38,45 @@ func New(strict bool, options ...wordlist.Option) (*Wordle, error) {
 	return w, nil
 }
 
+type Response struct {
+	Detail                           string
+	WordsRemaining, GuessesRemaining int
+}
+
 // Guess the given word.
-func (w *Wordle) Guess(g string) (wordsRemaining, guessesRemaining int, err error) {
-	if err = w.validate(g); err != nil {
-		return w.remaining.Length(), w.remainingGuesses, err
+func (w *Wordle) Guess(g string) (*Response, error) {
+	if err := w.validate(g); err != nil {
+		return nil, err
 	}
-	// TODO: evaluate guess
-	// TODO: reduce w.remaining
 	w.remainingGuesses--
-	return w.remaining.Length(), w.remainingGuesses, err
+	r := &Response{GuessesRemaining: w.remainingGuesses}
+	r.Detail = w.evaluateGuess(g)
+
+	// TODO: reduce w.remaining
+	r.WordsRemaining = w.remaining.Length()
+	return r, nil
+}
+
+func (w *Wordle) evaluateGuess(g string) string {
+	var response []rune
+	word := w.word
+	for i, b := range g {
+		c := byte(b)
+		r := wordler.NIL
+		if word[i] == c {
+			r = wordler.CORRECT
+		} else {
+			for j := i + 1; j < len(word); j++ {
+				if word[j] == c && g[j] != c {
+					r = wordler.ELSEWHERE
+					word = word[:j] + " " + word[j+1:] // prevent additional matches on this letter
+					break
+				}
+			}
+		}
+		response = append(response, r)
+	}
+	return string(response)
 }
 
 // validate guess based on strictness setting.
