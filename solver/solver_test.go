@@ -142,21 +142,25 @@ func TestRemaining(t *testing.T) {
 func TestDoubleLetters(t *testing.T) {
 	// Test cases with double-letters in the guess
 	cases := []struct {
-		guess    string
-		response []byte
-	}{
-		{
-			guess:    "worry",
-			response: []byte{wordler.NIL, wordler.CORRECT, wordler.CORRECT, wordler.NIL, wordler.CORRECT},
-		}, {
-			guess:    "robot",
-			response: []byte{wordler.ELSEWHERE, wordler.CORRECT, wordler.NIL, wordler.NIL, wordler.ELSEWHERE},
-		},
-	}
+		word, guess string
+		response    []byte
+	}{{
+		word:     "forty",
+		guess:    "worry",
+		response: []byte{wordler.NIL, wordler.CORRECT, wordler.CORRECT, wordler.NIL, wordler.CORRECT},
+	}, {
+		word:     "forty",
+		guess:    "robot",
+		response: []byte{wordler.ELSEWHERE, wordler.CORRECT, wordler.NIL, wordler.NIL, wordler.ELSEWHERE},
+	}, {
+		word:     "foyer",
+		guess:    "carer",
+		response: []byte{wordler.NIL, wordler.NIL, wordler.NIL, wordler.CORRECT, wordler.CORRECT},
+	}}
 
 	for _, c := range cases {
 		t.Run(c.guess, func(t *testing.T) {
-			s := &Solver{w: wordlist.New([]string{"forty"})}
+			s := &Solver{w: wordlist.New([]string{c.word})}
 			response := string(c.response)
 			if err := s.React(c.guess, response); err != nil {
 				t.Errorf("Error: %v", err)
@@ -164,7 +168,7 @@ func TestDoubleLetters(t *testing.T) {
 			if s.Remaining() != 1 {
 				t.Errorf("want 1, got %d", s.Remaining())
 			}
-			want := wordlist.New([]string{"forty"})
+			want := wordlist.New([]string{c.word})
 			if !want.Equals(s.w) {
 				t.Errorf("want %#v; got %#v", want, s.w)
 			}

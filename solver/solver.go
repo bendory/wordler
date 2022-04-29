@@ -3,6 +3,7 @@ package solver
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"wordler"
 	"wordler/wordlist"
@@ -54,26 +55,34 @@ func (s *Solver) React(guess, response string) error {
 	}
 
 	matches := 0
-	keepOnly := "^" // letters in required positions
+	keepOnly := make([]string, 5) // letters in required positions
 
-	for i, r := range response {
-		c := guess[i]
+	// Need to process response signals in this order; see test case for
+	// combination of guess "carer" for word "foyer" in solver_test to
+	// understand why.
+	for _, reaction := range []rune{wordler.CORRECT, wordler.ELSEWHERE, wordler.NIL} {
+		for i, r := range response {
+			if r != reaction {
+				continue
+			}
+			c := guess[i]
 
-		switch r {
-		case wordler.CORRECT:
-			matches++
-			keepOnly += string(c)
-			s.have[c] = true
+			switch r {
+			case wordler.CORRECT:
+				matches++
+				keepOnly[i] = string(c)
+				s.have[c] = true
 
-		case wordler.ELSEWHERE:
-			keepOnly += "[^" + string(c) + "]"
-			s.w.KeepOnly(regexp.MustCompile(string(c)))
-			s.have[c] = true
+			case wordler.ELSEWHERE:
+				keepOnly[i] = "[^" + string(c) + "]"
+				s.w.KeepOnly(regexp.MustCompile(string(c)))
+				s.have[c] = true
 
-		case wordler.NIL:
-			keepOnly += "[^" + string(c) + "]"
-			if !s.have[c] {
-				s.w.Delete(regexp.MustCompile(string(c)))
+			case wordler.NIL:
+				keepOnly[i] = "[^" + string(c) + "]"
+				if !s.have[c] {
+					s.w.Delete(regexp.MustCompile(string(c)))
+				}
 			}
 		}
 	}
@@ -83,9 +92,9 @@ func (s *Solver) React(guess, response string) error {
 		// complete match!
 		s.w = wordlist.New([]string{guess})
 	} else {
-		keepOnly += "$"
-		debug("keepOnly: '%v'", keepOnly)
-		s.w.KeepOnly(regexp.MustCompile(keepOnly))
+		p := "^" + strings.Join(keepOnly, "") + "$"
+		debug("keepOnly: '%v'", p)
+		s.w.KeepOnly(regexp.MustCompile(p))
 	}
 	return nil
 }
