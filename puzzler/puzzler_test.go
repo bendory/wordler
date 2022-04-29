@@ -1,4 +1,4 @@
-package wordler
+package puzzler
 
 import (
 	"errors"
