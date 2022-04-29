@@ -6,27 +6,37 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 type WordList struct {
 	words map[string]bool
 }
 
+var (
+	once           sync.Once
+	fullDictionary []string
+	err            error
+)
+
 // NewDictionary returns a *WordList containing /usr/share/dict/words.
 // TODO: make this platform-independent via goos.Is*
 func NewDictionary() (*WordList, error) {
-	file, err := os.Open(`/usr/share/dict/words`)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+	once.Do(func() {
+		var file *os.File
+		file, err = os.Open(`/usr/share/dict/words`)
+		if err != nil {
+			return
+		}
+		defer file.Close()
 
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, strings.ToLower(scanner.Text()))
-	}
-	return New(lines), scanner.Err()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			fullDictionary = append(fullDictionary, strings.ToLower(scanner.Text()))
+		}
+		err = scanner.Err()
+	})
+	return New(fullDictionary), err
 }
 
 // New creates a new WordList containing the words in s.
