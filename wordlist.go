@@ -49,12 +49,23 @@ func (w *WordList) Length() int {
 
 // Delete removes all elements that match the given Regexp.
 func (w *WordList) Delete(r *regexp.Regexp) {
+	w.filter(r, true)
+}
+
+// KeepOnly removes all elements that don't match the given Regexp.
+func (w *WordList) KeepOnly(r *regexp.Regexp) {
+	w.filter(r, false)
+}
+
+// filter WordList based on r; if omit is true, delete matching items. If omit
+// is false, keep matching items.
+func (w *WordList) filter(r *regexp.Regexp, omit bool) {
 	if w == nil {
 		return
 	}
 	last := w.Length() - 1
 	for i := last; i >= 0; i-- {
-		if r.MatchString(w.words[i]) {
+		if omit == r.MatchString(w.words[i]) {
 			w.words[i], w.words[last] = w.words[last], w.words[i]
 			last--
 		}

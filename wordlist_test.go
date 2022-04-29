@@ -28,9 +28,9 @@ func TestLength(t *testing.T) {
 }
 
 func TestEquals(t *testing.T) {
-	cases := []struct{
+	cases := []struct {
 		left, right *WordList
-		want bool
+		want        bool
 	}{
 		{nil, nil, true},
 		{nil, &WordList{}, false},
@@ -49,15 +49,16 @@ func TestEquals(t *testing.T) {
 	}
 }
 
-func TestFilter(t *testing.T) {
+func TestDelete(t *testing.T) {
 	cases := []struct {
 		filter string
 		want   WordList
 	}{
-		{".oo", WordList{[]string{"bam", "bar"}}},
+		{".oo", WordList{[]string{"bar", "bam"}}},
 		{"ba", WordList{[]string{"foo", "zoo"}}},
 		{"....", WordList{baseList}},
 		{"...", WordList{[]string{}}},
+		{"..", WordList{[]string{}}},
 		{"", WordList{}},
 		{"nomatch", WordList{baseList}},
 	}
@@ -66,6 +67,36 @@ func TestFilter(t *testing.T) {
 		t.Run(c.filter, func(t *testing.T) {
 			w := &WordList{baseList}
 			w.Delete(regexp.MustCompile(c.filter))
+
+			if got, want := w.Length(), c.want.Length(); got != want {
+				t.Fatalf("got %d words %#v, want %d %#v", got, w, want, c.want)
+			}
+
+			if !w.Equals(&c.want) {
+				t.Errorf("got %#v, want %#v", w, c.want)
+			}
+		})
+	}
+}
+
+func TestKeepOnly(t *testing.T) {
+	cases := []struct {
+		filter string
+		want   WordList
+	}{
+		{".oo", WordList{[]string{"foo", "zoo"}}},
+		{"ba", WordList{[]string{"bar", "bam"}}},
+		{"....", WordList{}},
+		{"...", WordList{baseList}},
+		{"..", WordList{baseList}},
+		{"", WordList{baseList}},
+		{"nomatch", WordList{}},
+	}
+
+	for _, c := range cases {
+		t.Run(c.filter, func(t *testing.T) {
+			w := &WordList{baseList}
+			w.KeepOnly(regexp.MustCompile(c.filter))
 
 			if got, want := w.Length(), c.want.Length(); got != want {
 				t.Fatalf("got %d words %#v, want %d %#v", got, w, want, c.want)
