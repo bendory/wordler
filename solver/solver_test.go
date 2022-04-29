@@ -108,20 +108,20 @@ func TestReact(t *testing.T) {
 }
 
 func TestRemaining(t *testing.T) {
-	g := &Solver{w: wordlist.New([]string{"f"})}
-	if want, got := 1, g.Remaining(); want != got {
+	s := &Solver{w: wordlist.New([]string{"f"})}
+	if want, got := 1, s.Remaining(); want != got {
 		t.Errorf("want %d, got %d", want, got)
 	}
-	g.w = wordlist.New([]string{})
-	if want, got := 0, g.Remaining(); want != got {
+	s.w = wordlist.New([]string{})
+	if want, got := 0, s.Remaining(); want != got {
 		t.Errorf("want %d, got %d", want, got)
 	}
-	g.w = nil
-	if want, got := 0, g.Remaining(); want != got {
+	s.w = nil
+	if want, got := 0, s.Remaining(); want != got {
 		t.Errorf("want %d, got %d", want, got)
 	}
-	g = nil
-	if want, got := 0, g.Remaining(); want != got {
+	s = nil
+	if want, got := 0, s.Remaining(); want != got {
 		t.Errorf("want %d, got %d", want, got)
 	}
 }
@@ -143,21 +143,21 @@ func TestDoubleLetters(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.guess, func(t *testing.T) {
-			g := &Solver{w: wordlist.New([]string{"forty"})}
+			s := &Solver{w: wordlist.New([]string{"forty"})}
 			response := string(c.response)
-			g.React(c.guess, response)
-			if g.Remaining() != 1 {
-				t.Errorf("want 1, got %d", g.Remaining())
+			s.React(c.guess, response)
+			if s.Remaining() != 1 {
+				t.Errorf("want 1, got %d", s.Remaining())
 			}
 			want := wordlist.New([]string{"forty"})
-			if !want.Equals(g.w) {
-				t.Errorf("want %#v; got %#v", want, g.w)
+			if !want.Equals(s.w) {
+				t.Errorf("want %#v; got %#v", want, s.w)
 			}
 		})
 	}
 
 	// Guess case should be eliminated.
-	g := &Solver{
+	s := &Solver{
 		w: wordlist.New([]string{"array", "foray"}),
 		have: map[byte]bool{
 			'r': true,
@@ -166,10 +166,10 @@ func TestDoubleLetters(t *testing.T) {
 		},
 	}
 	response := string([]byte{NIL, NIL, CORRECT, CORRECT, CORRECT})
-	g.React("array", response)
+	s.React("array", response)
 	want := wordlist.New([]string{"foray"})
-	if !want.Equals(g.w) {
-		t.Errorf("want %#v; got %#v", want, g.w)
+	if !want.Equals(s.w) {
+		t.Errorf("want %#v; got %#v", want, s.w)
 	}
 }
 
