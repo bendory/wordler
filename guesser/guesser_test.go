@@ -127,6 +127,7 @@ func TestRemaining(t *testing.T) {
 }
 
 func TestDoubleLetters(t *testing.T) {
+	// Test cases with double-letters in the guess
 	cases := []struct {
 		guess    string
 		response []byte
@@ -153,5 +154,21 @@ func TestDoubleLetters(t *testing.T) {
 				t.Errorf("want %#v; got %#v", want, g.w)
 			}
 		})
+	}
+
+	// Guess case should be eliminated.
+	g := &Guesser{
+		w: wordlist.New([]string{"array", "foray"}),
+		have: map[byte]bool{
+			'r': true,
+			'a': true,
+			'y': true,
+		},
+	}
+	response := string([]byte{NIL, NIL, CORRECT, CORRECT, CORRECT})
+	g.React("array", response)
+	want := wordlist.New([]string{"foray"})
+	if !want.Equals(g.w) {
+		t.Errorf("want %#v; got %#v", want, g.w)
 	}
 }

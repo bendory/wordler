@@ -103,7 +103,7 @@ func (g *Guesser) React(guess, response string) {
 			g.have[c] = true
 
 		case NIL:
-			keepOnly += "."
+			keepOnly += "[^" + string(c) + "]"
 			if !g.have[c] {
 				g.w.Delete(regexp.MustCompile(string(c)))
 			}
