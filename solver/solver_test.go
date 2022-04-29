@@ -2,7 +2,6 @@ package solver
 
 import (
 	"regexp"
-	"strings"
 	"testing"
 
 	"wordler/wordlist"
@@ -74,24 +73,24 @@ func TestReact(t *testing.T) {
 		guess, response string
 		remaining       *wordlist.WordList
 	}{
-		{"bar", strings.Repeat(string(CORRECT), 3), wordlist.New([]string{"bar"})},
-		{"###", strings.Repeat(string(NIL), 3), wordlist.New(testList)},
-		{"abc", strings.Repeat(string(NIL), 3), wordlist.New([]string{"foo"})},
+		{"bar", string([]byte{CORRECT, CORRECT, CORRECT}), wordlist.New([]string{"bar"})},
+		{"###", string([]byte{NIL, NIL, NIL}), wordlist.New(testList)},
+		{"abc", string([]byte{NIL, NIL, NIL}), wordlist.New([]string{"foo"})},
 		{
 			"b##",
-			string(ELSEWHERE) + string(NIL) + string(NIL),
+			string([]byte{ELSEWHERE, NIL, NIL}),
 			wordlist.New([]string{"zbz"}),
 		}, {
 			"#oz",
-			string(NIL) + string(NIL) + string(ELSEWHERE),
+			string([]byte{NIL, NIL, ELSEWHERE}),
 			wordlist.New([]string{"zap"}),
 		}, {
 			"zfo",
-			string(NIL) + string(ELSEWHERE) + string(CORRECT),
+			string([]byte{NIL, ELSEWHERE, CORRECT}),
 			wordlist.New([]string{"foo"}),
 		}, {
 			"b#r",
-			string(CORRECT) + string(NIL) + string(CORRECT),
+			string([]byte{CORRECT, NIL, CORRECT}),
 			wordlist.New([]string{"bar"}),
 		},
 	}
