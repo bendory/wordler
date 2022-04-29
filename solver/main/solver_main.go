@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"wordler"
 	"wordler/solver"
 	"wordler/wordlist"
 )
@@ -14,9 +15,9 @@ const wordLength = 5
 
 func main() {
 	fmt.Println("I'm a wordle solver! I'll make guesses, you tell me wordle's response.")
-	fmt.Printf("Use '%c' for \"right letter in the right place\"\n", solver.CORRECT)
-	fmt.Printf("Use '%c' for \"right letter in the wrong place\"\n", solver.ELSEWHERE)
-	fmt.Printf("Use '%c' for \"letter not in the word\"\n", solver.NIL)
+	fmt.Printf("Use '%c' for \"right letter in the right place\"\n", wordler.CORRECT)
+	fmt.Printf("Use '%c' for \"right letter in the wrong place\"\n", wordler.ELSEWHERE)
+	fmt.Printf("Use '%c' for \"letter not in the word\"\n", wordler.NIL)
 	fmt.Println("Respond with the letter 'n' by itself to tell me that my guess isn't in wordle's dictionary.")
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()

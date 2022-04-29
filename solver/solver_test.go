@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"testing"
 
+	"wordler"
 	"wordler/wordlist"
 )
 
@@ -73,24 +74,24 @@ func TestReact(t *testing.T) {
 		guess, response string
 		remaining       *wordlist.WordList
 	}{
-		{"bar", string([]byte{CORRECT, CORRECT, CORRECT}), wordlist.New([]string{"bar"})},
-		{"###", string([]byte{NIL, NIL, NIL}), wordlist.New(testList)},
-		{"abc", string([]byte{NIL, NIL, NIL}), wordlist.New([]string{"foo"})},
+		{"bar", string([]byte{wordler.CORRECT, wordler.CORRECT, wordler.CORRECT}), wordlist.New([]string{"bar"})},
+		{"###", string([]byte{wordler.NIL, wordler.NIL, wordler.NIL}), wordlist.New(testList)},
+		{"abc", string([]byte{wordler.NIL, wordler.NIL, wordler.NIL}), wordlist.New([]string{"foo"})},
 		{
 			"b##",
-			string([]byte{ELSEWHERE, NIL, NIL}),
+			string([]byte{wordler.ELSEWHERE, wordler.NIL, wordler.NIL}),
 			wordlist.New([]string{"zbz"}),
 		}, {
 			"#oz",
-			string([]byte{NIL, NIL, ELSEWHERE}),
+			string([]byte{wordler.NIL, wordler.NIL, wordler.ELSEWHERE}),
 			wordlist.New([]string{"zap"}),
 		}, {
 			"zfo",
-			string([]byte{NIL, ELSEWHERE, CORRECT}),
+			string([]byte{wordler.NIL, wordler.ELSEWHERE, wordler.CORRECT}),
 			wordlist.New([]string{"foo"}),
 		}, {
 			"b#r",
-			string([]byte{CORRECT, NIL, CORRECT}),
+			string([]byte{wordler.CORRECT, wordler.NIL, wordler.CORRECT}),
 			wordlist.New([]string{"bar"}),
 		},
 	}
@@ -140,10 +141,10 @@ func TestDoubleLetters(t *testing.T) {
 	}{
 		{
 			guess:    "worry",
-			response: []byte{NIL, CORRECT, CORRECT, NIL, CORRECT},
+			response: []byte{wordler.NIL, wordler.CORRECT, wordler.CORRECT, wordler.NIL, wordler.CORRECT},
 		}, {
 			guess:    "robot",
-			response: []byte{ELSEWHERE, CORRECT, NIL, NIL, ELSEWHERE},
+			response: []byte{wordler.ELSEWHERE, wordler.CORRECT, wordler.NIL, wordler.NIL, wordler.ELSEWHERE},
 		},
 	}
 
@@ -173,7 +174,7 @@ func TestDoubleLetters(t *testing.T) {
 			'y': true,
 		},
 	}
-	response := string([]byte{NIL, NIL, CORRECT, CORRECT, CORRECT})
+	response := string([]byte{wordler.NIL, wordler.NIL, wordler.CORRECT, wordler.CORRECT, wordler.CORRECT})
 	if err := s.React("array", response); err != nil {
 		t.Errorf("Error: %v", err)
 	}

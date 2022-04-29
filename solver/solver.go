@@ -4,13 +4,8 @@ import (
 	"fmt"
 	"regexp"
 
+	"wordler"
 	"wordler/wordlist"
-)
-
-const (
-	CORRECT   = '+'
-	ELSEWHERE = '*'
-	NIL       = '_'
 )
 
 var verbose = false
@@ -61,17 +56,17 @@ func (s *Solver) React(guess, response string) error {
 		c := guess[i]
 
 		switch r {
-		case CORRECT:
+		case wordler.CORRECT:
 			matches++
 			keepOnly += string(c)
 			s.have[c] = true
 
-		case ELSEWHERE:
+		case wordler.ELSEWHERE:
 			keepOnly += "[^" + string(c) + "]"
 			s.w.KeepOnly(regexp.MustCompile(string(c)))
 			s.have[c] = true
 
-		case NIL:
+		case wordler.NIL:
 			keepOnly += "[^" + string(c) + "]"
 			if !s.have[c] {
 				s.w.Delete(regexp.MustCompile(string(c)))
