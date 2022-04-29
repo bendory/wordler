@@ -44,9 +44,12 @@ func (f *fakeLoader) Load(_ ...wordlist.Option) (*wordlist.WordList, error) {
 
 func TestSimulations(t *testing.T) {
 	args := &puzzler.Args{Hard: true, Guesses: 1}
+
+	was := wordlist.Loader
 	f := &fakeLoader{}
 	wordlist.Loader = f
-		
+	defer func() { wordlist.Loader = was }()
+
 	// Runtime is O((l^l)^2) -- so running simulations with wordlists >4
 	// takes... forever. Length 5 --> 9MM+ test cases, and I don't think we get
 	// any extra benefit from it.
