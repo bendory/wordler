@@ -10,8 +10,6 @@ import (
 	"wordler/wordlist"
 )
 
-const defaultGuesses = 6
-
 // Wordle is a Wordle puzzle.
 type Wordle struct {
 	dict             *wordlist.WordList // full dictionary
@@ -43,8 +41,8 @@ func New(a *Args) (*Wordle, error) {
 	if a == nil {
 		a = &Args{
 			Hard:       true,
-			WordLength: wordler.WORD_LENGTH,
-			Guesses:    defaultGuesses,
+			WordLength: wordler.DEFAULT_WORD_LENGTH,
+			Guesses:    wordler.DEFAULT_GUESSES,
 		}
 	}
 	a.Options = append(a.Options, wordlist.KeepOnlyOption{Exp: regexp.MustCompile(fmt.Sprintf("^[a-z]{%d}$", a.WordLength))})

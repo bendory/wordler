@@ -58,7 +58,7 @@ func TestValidate(t *testing.T) {
 		dict:             wordlist.New(list),
 		remaining:        wordlist.New(list),
 		word:             list[0],
-		remainingGuesses: defaultGuesses,
+		remainingGuesses: wordler.DEFAULT_GUESSES,
 		hard:             true,
 	}
 	if got := p.validate(list[0]); got != nil {
@@ -126,7 +126,7 @@ func TestGuess(t *testing.T) {
 				dict:             wordlist.New(c.list),
 				remaining:        wordlist.New(c.list),
 				word:             c.word,
-				remainingGuesses: defaultGuesses,
+				remainingGuesses: wordler.DEFAULT_GUESSES,
 				hard:             true,
 			}
 
@@ -156,8 +156,12 @@ func TestRemaining(t *testing.T) {
 		dict:             wordlist.New(list),
 		remaining:        wordlist.New(list),
 		word:             list[len(list)-1],
-		remainingGuesses: defaultGuesses,
+		remainingGuesses: wordler.DEFAULT_GUESSES,
 		hard:             true,
+	}
+
+	if p.Guesses() >= p.Words() {
+		t.Errorf("want guesses %d < remaining words %d", p.Guesses(), p.Words())
 	}
 
 	// A rejected guess should not consume a remaining guess.
@@ -169,8 +173,8 @@ func TestRemaining(t *testing.T) {
 		t.Errorf("want %v, got %v", NotInDictionaryErr, err)
 	}
 
-	legit := list[:defaultGuesses]
-	bogus := list[defaultGuesses:]
+	legit := list[:wordler.DEFAULT_GUESSES]
+	bogus := list[wordler.DEFAULT_GUESSES:]
 	if len(legit) < 1 {
 		t.Error("legit is bogus! want at least 1 item.")
 	}
@@ -180,7 +184,7 @@ func TestRemaining(t *testing.T) {
 
 	for i, guess := range legit {
 		t.Run(fmt.Sprintf("legit_%d", i), func(t *testing.T) {
-			if want, got := defaultGuesses-i, p.Guesses(); want != got {
+			if want, got := wordler.DEFAULT_GUESSES-i, p.Guesses(); want != got {
 				t.Errorf("pre-guess: want %d guesses, got %d", want, got)
 			}
 			response, err = p.Guess(guess)
@@ -193,7 +197,7 @@ func TestRemaining(t *testing.T) {
 			if want, got := len(list)-i-1, p.Words(); want != got {
 				t.Errorf("want %d remaining words, got %d", want, got)
 			}
-			if want, got := defaultGuesses-i-1, p.Guesses(); want != got {
+			if want, got := wordler.DEFAULT_GUESSES-i-1, p.Guesses(); want != got {
 				t.Errorf("post-guess: want %d guesses, got %d", want, got)
 			}
 		})
@@ -242,10 +246,10 @@ func TestGiveUp(t *testing.T) {
 		dict:             wordlist.New(list),
 		remaining:        wordlist.New(list),
 		word:             list[0],
-		remainingGuesses: defaultGuesses,
+		remainingGuesses: wordler.DEFAULT_GUESSES,
 	}
 
-	if want, got := defaultGuesses, p.Guesses(); want != got {
+	if want, got := wordler.DEFAULT_GUESSES, p.Guesses(); want != got {
 		t.Errorf("want %v, got %v", want, got)
 	}
 	if want, got := len(list), p.Words(); want != got {

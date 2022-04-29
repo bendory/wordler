@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("I'm a wordle puzzle! You make guesses, I'll score them.")
-	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", wordler.WORD_LENGTH)
+	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", wordler.DEFAULT_WORD_LENGTH)
 	fmt.Printf("I'll use '%c' for \"right letter in the right place\"\n", wordler.CORRECT)
 	fmt.Printf("I'll use '%c' for \"right letter in the wrong place\"\n", wordler.ELSEWHERE)
 	fmt.Printf("I'll use '%c' for \"letter not in the word\"\n", wordler.NIL)
