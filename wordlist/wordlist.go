@@ -142,9 +142,8 @@ func (w *WordList) Random() string {
 // OptimalGuess returns the best guess from this WordList.
 // The best guess:
 // - uses the most common letters based on letter frequency of words in the list
-// - returns a word with the heaviest weighted-average letter frequency
-//
-// TODO: avoid words with double-letters when choosing the word to return
+// - returns a word with the highest count of new letters that has the heaviest
+//   weighted-average letter frequency
 func (w *WordList) OptimalGuess() string {
 	if w == nil {
 		return ""
@@ -157,14 +156,27 @@ func (w *WordList) OptimalGuess() string {
 		}
 	}
 
-	// identify a heaviest word
-	heaviest, max := "", 0
+	// identify the most diverse / heaviest word
+	var (
+		heaviest string
+		max, mostDiverse int
+	)
 	for word, _ := range w.words {
 		weight := 0
+		uniq := make(map[int32]bool)
 		for _, c := range word {
 			weight += counts[c]
+			uniq[c] = true
 		}
-		if weight > max {
+		diversity := len(uniq)
+		switch {
+		case diversity < mostDiverse:
+			// do nothing
+		case diversity > mostDiverse:
+			heaviest = word
+			max = weight
+			mostDiverse = diversity
+		case weight > max: // diversity == mostDiverse
 			heaviest = word
 			max = weight
 		}
