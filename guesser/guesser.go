@@ -1,8 +1,8 @@
 package guesser
 
 import (
+	"fmt"
 	"regexp"
-	"strings"
 
 	"wordler/wordlist"
 )
@@ -12,6 +12,8 @@ const (
 	RIGHT_LETTER_WRONG_PLACE = '*'
 	LETTER_NOT_IN_WORD       = '_'
 )
+
+var verbose = false
 
 // Guesser is a wordle guesser.
 type Guesser struct {
@@ -72,10 +74,12 @@ func (g *Guesser) Guess() string {
 // React "reacts" to the scored guess by filtering out excluded words from our
 // WordList.
 func (g *Guesser) React(guess, response string) {
+	if len(guess) != len(response) {
+		panic(fmt.Sprintf("guess len(%v)==%d; response len(%v) == %d", guess, len(guess), response, len(response)))
+	}
+
 	matches := 0
-	matchFilter := "^"       // letters in required spaces
-	missFilter := ""         // excluded letters
-	hasFilters := []string{} // letters included in some other space
+	keepOnly := "^" // letters in required positions
 
 	for i, r := range response {
 		c := guess[i]
@@ -83,36 +87,26 @@ func (g *Guesser) React(guess, response string) {
 		switch r {
 		case RIGHT_LETTER_RIGHT_PLACE:
 			matches++
-			matchFilter += string(c)
+			keepOnly += string(c)
 
 		case RIGHT_LETTER_WRONG_PLACE:
-			matchFilter += "."
-			hasFilters = append(hasFilters, "^"+strings.Repeat(".", i)+string(c))
+			keepOnly += "[^" + string(c) + "]"
+			g.w.KeepOnly(regexp.MustCompile(string(c)))
 
 		case LETTER_NOT_IN_WORD:
-			matchFilter += "."
-			missFilter += string(c)
+			keepOnly += "."
+			g.w.Delete(regexp.MustCompile(string(c)))
 		}
 	}
 
-	switch matches {
-	case 0:
-		// do nothing; no matches
-	case len(guess):
+	debug("found %d matches", matches)
+	if matches == len(guess) {
 		// complete match!
 		g.w = wordlist.New([]string{guess})
-	default:
-		// we found some matches, but not a complete match
-		matchFilter += "$"
-		g.w.KeepOnly(regexp.MustCompile(matchFilter))
-	}
-
-	if len(missFilter) > 0 {
-		g.w.Delete(regexp.MustCompile("[" + missFilter + "]"))
-	}
-
-	if len(hasFilters) > 0 {
-		g.w.Delete(regexp.MustCompile(strings.Join(hasFilters, "|")))
+	} else {
+		keepOnly += "$"
+		debug("keepOnly: '%v'", keepOnly)
+		g.w.KeepOnly(regexp.MustCompile(keepOnly))
 	}
 
 	return
@@ -124,4 +118,11 @@ func (g *Guesser) Remaining() int {
 		return 0
 	}
 	return g.w.Length()
+}
+
+func debug(f string, args ...interface{}) {
+	if verbose {
+		fmt.Printf(f, args...)
+		fmt.Println()
+	}
 }

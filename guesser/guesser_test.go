@@ -8,8 +8,6 @@ import (
 	"wordler/wordlist"
 )
 
-var testList = []string{"foo", "bar", "bam", "zap", "zbz"}
-
 func TestNew(t *testing.T) {
 	g, err := New()
 	if err != nil {
@@ -45,6 +43,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestGuess(t *testing.T) {
+	testList := []string{"foo", "bar", "bam", "zap", "zbz"}
 	guesser := &Guesser{w: wordlist.New(testList)}
 	guess := guesser.Guess()
 
@@ -70,27 +69,28 @@ func TestGuess(t *testing.T) {
 }
 
 func TestReact(t *testing.T) {
+	testList := []string{"foo", "bar", "bam", "zap", "zbz"}
 	cases := []struct {
 		guess, response string
 		remaining       *wordlist.WordList
 	}{
 		{"bar", strings.Repeat(string(RIGHT_LETTER_RIGHT_PLACE), 3), wordlist.New([]string{"bar"})},
-		{"$$$", strings.Repeat(string(LETTER_NOT_IN_WORD), 3), wordlist.New(testList)},
+		{"###", strings.Repeat(string(LETTER_NOT_IN_WORD), 3), wordlist.New(testList)},
 		{"abc", strings.Repeat(string(LETTER_NOT_IN_WORD), 3), wordlist.New([]string{"foo"})},
 		{
-			"b$$",
+			"b##",
 			string(RIGHT_LETTER_WRONG_PLACE) + string(LETTER_NOT_IN_WORD) + string(LETTER_NOT_IN_WORD),
-			wordlist.New([]string{"foo", "zap", "zbz"}),
+			wordlist.New([]string{"zbz"}),
 		}, {
-			"$oz",
+			"#oz",
 			string(LETTER_NOT_IN_WORD) + string(LETTER_NOT_IN_WORD) + string(RIGHT_LETTER_WRONG_PLACE),
-			wordlist.New([]string{"bar", "bam", "zap"}),
+			wordlist.New([]string{"zap"}),
 		}, {
 			"zfo",
 			string(LETTER_NOT_IN_WORD) + string(RIGHT_LETTER_WRONG_PLACE) + string(RIGHT_LETTER_RIGHT_PLACE),
 			wordlist.New([]string{"foo"}),
 		}, {
-			"b$r",
+			"b#r",
 			string(RIGHT_LETTER_RIGHT_PLACE) + string(LETTER_NOT_IN_WORD) + string(RIGHT_LETTER_RIGHT_PLACE),
 			wordlist.New([]string{"bar"}),
 		},
