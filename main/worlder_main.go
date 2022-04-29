@@ -12,6 +12,12 @@ import (
 	"wordler/wordlist"
 )
 
+type stats struct {
+	iterations, puzzlerFailures, solverFailures, invalidGuesses int
+	noWordsRemaining, outOfGuesses, badReactions, winners       int
+	winningIteration                                            float32
+}
+
 func main() {
 	args := &puzzler.Args{}
 	flag.BoolVar(&args.Hard, "hard", true, "use hard rules: 'Any revealed hints must be used in subsequent guesses'")
@@ -27,9 +33,12 @@ func main() {
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
+	count := stats{}
+
 	option := wordlist.KeepOnlyOption{Exp: regexp.MustCompile(fmt.Sprintf("^.{%d}$", args.WordLength))}
 	winningResponse := strings.Repeat(string(wordler.CORRECT), args.WordLength)
 	for i := 0; i < *iterations; i++ {
+		count.iterations++
 		fmt.Printf("Iteration %d/%d: ", i+1, *iterations)
 		p, err := puzzler.New(args)
 		if err != nil {
@@ -57,11 +66,14 @@ func main() {
 				switch err {
 				case puzzler.InvalidGuessErr, puzzler.NotInDictionaryErr:
 					fmt.Printf("  Invalid guess '%v': %v\n", guess, err)
+					count.invalidGuesses++
 					s.NotInWordle(guess)
 				case puzzler.OutOfGuessesErr:
+					count.outOfGuesses++
 					break GUESS
 				case puzzler.NoWordsRemainingErr:
 					fmt.Println("  Uh oh, no words remaining in Puzzler!?")
+					count.noWordsRemaining++
 					break GUESS
 				case nil:
 					break GUESS
@@ -73,15 +85,22 @@ func main() {
 			} else {
 				fmt.Printf("  '%v' --> '%v'\n", guess, response)
 				if err = s.React(guess, response); err != nil {
+					count.badReactions++
 					fmt.Printf("  ERROR: guess '%v' --> %v\n", guess, err)
 				}
 			}
 		}
 
-		if p.Guesses() == 0 && response != winningResponse {
+		if response == winningResponse {
+			count.winners++
+			count.winningIteration += float32(args.Guesses - p.Guesses())
+		} else if p.Guesses() == 0 {
 			fmt.Println("YOU LOSE!")
 		}
 		fmt.Printf("  The solution is '%v'.\n", p.GiveUp())
 		fmt.Println()
 	}
+
+	count.winningIteration /= float32(count.iterations)
+	fmt.Printf("Stats gathered: %#v\n", count)
 }
