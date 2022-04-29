@@ -295,3 +295,20 @@ func TestNilWordle(t *testing.T) {
 		t.Errorf("want %v, got %v", want, got)
 	}
 }
+
+func TestSolution(t *testing.T) {
+	list := []string{"foo", "bar", "bam", "zap"}
+	was := wordlist.Loader
+	defer func() { wordlist.Loader = was }()
+	f := &fakeLoader{words: list}
+	wordlist.Loader = f
+
+	args := &Args{Solution: list[0], WordLength: 3}
+	if _, err := New(args); err != nil {
+		t.Errorf("error: %v", err)
+	}
+	args.Solution = "bogus"
+	if _, err := New(args); err != NotInDictionaryErr {
+		t.Errorf("error: %v", err)
+	}
+}

@@ -21,9 +21,11 @@ type Wordle struct {
 	hard             bool               // hard or easy rules?
 }
 
+// Args are used to construct a new Wordle puzzle.
 type Args struct {
-	Hard                bool
+	Hard                bool // hard rules
 	WordLength, Guesses int
+	Solution            string // create a puzzler with this solution; otherwise a random word is chosen
 	Options             []wordlist.Option
 }
 
@@ -58,7 +60,15 @@ func New(a *Args) (*Wordle, error) {
 	if w.Words() == 0 {
 		return nil, NoWordsRemainingErr
 	}
-	w.word = w.dict.Random()
+	if a.Solution != "" {
+		if err := w.validate(a.Solution); err == nil {
+			w.word = a.Solution
+		} else {
+			return nil, err
+		}
+	} else {
+		w.word = w.dict.Random()
+	}
 	return w, nil
 }
 
