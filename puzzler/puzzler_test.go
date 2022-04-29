@@ -2,8 +2,10 @@ package wordler
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
+	"wordler"
 	"wordler/wordlist"
 )
 
@@ -77,39 +79,42 @@ func TestGuess(t *testing.T) {
 	defer func() { wordlist.Loader = was }()
 	wordlist.Loader = fakeLoader{words: list}
 
-	p, err := New(true)
-	if err != nil {
-		t.Errorf("error: %v", err)
-	}
-	p.word = list[0]
+	cases := []struct {
+		guess, word string
+		response    *Response
+		err         error
+	}{{
+		guess:    list[1],
+		word:     list[0],
+		response: &Response{Detail: string([]byte{wordler.NIL, wordler.NIL, wordler.NIL}), WordsRemaining: 1},
+	}, {
+		guess:    list[0],
+		word:     list[0],
+		response: &Response{Detail: string([]byte{wordler.CORRECT, wordler.CORRECT, wordler.CORRECT}), WordsRemaining: 1},
+	}, {
+		guess:    list[2],
+		word:     list[1],
+		response: &Response{Detail: string([]byte{wordler.CORRECT, wordler.CORRECT, wordler.NIL}), WordsRemaining: 1},
+		// TODO: test ELSEWHERE values too
+	}}
 
-	gotResponse, gotErr := p.Guess(list[1])
-	if gotErr != nil {
-		t.Errorf("error: %v", err)
+	for _, c := range cases {
+		t.Run(fmt.Sprint("g:", c.guess, "+w:", c.word), func(t *testing.T) {
+			p, err := New(true)
+			if err != nil {
+				t.Errorf("error: %v", err)
+			}
+			p.word = c.word
+			response, err := p.Guess(c.guess)
+			if err != c.err {
+				t.Errorf("want %v; got %v", c.err, err)
+			}
+			if want, got := c.response.Detail, response.Detail; want != got {
+				t.Errorf("want %v; got %v", want, got)
+			}
+			if want, got := c.response.WordsRemaining, response.WordsRemaining; want != got {
+				t.Errorf("want %v; got %v", want, got)
+			}
+		})
 	}
-	if want, got := "___", gotResponse.Detail; want != got {
-		t.Errorf("want %#v; got %#v", want, got)
-	}
-	// TODO: check other values in gotResponse
-
-	gotResponse, gotErr = p.Guess(list[0])
-	if gotErr != nil {
-		t.Errorf("error: %v", err)
-	}
-	if want, got := "+++", gotResponse.Detail; want != got {
-		t.Errorf("want %#v; got %#v", want, got)
-	}
-	// TODO: check other values in gotResponse
-
-	p.word = list[1]
-	gotResponse, gotErr = p.Guess(list[2])
-	if gotErr != nil {
-		t.Errorf("error: %v", err)
-	}
-	if want, got := "++_", gotResponse.Detail; want != got {
-		t.Errorf("want %#v; got %#v", want, got)
-	}
-	// TODO: check other values in gotResponse
-
-	// TODO: test ELSEWHERE values too
 }

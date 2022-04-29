@@ -2,6 +2,9 @@ package wordler
 
 import (
 	"errors"
+	"fmt"
+	"regexp"
+	"strings"
 
 	"wordler"
 	"wordler/wordlist"
@@ -49,11 +52,12 @@ func (w *Wordle) Guess(g string) (*Response, error) {
 		return nil, err
 	}
 	w.remainingGuesses--
-	r := &Response{GuessesRemaining: w.remainingGuesses}
-	r.Detail = w.evaluateGuess(g)
-
-	// TODO: reduce w.remaining
+	r := &Response{
+		GuessesRemaining: w.remainingGuesses,
+		Detail:           w.evaluateGuess(g),
+	}
 	r.WordsRemaining = w.remaining.Length()
+
 	return r, nil
 }
 
@@ -65,13 +69,20 @@ func (w *Wordle) evaluateGuess(g string) string {
 		r := wordler.NIL
 		if word[i] == c {
 			r = wordler.CORRECT
+			w.remaining.KeepOnly(regexp.MustCompile(fmt.Sprintf("^%s%s", strings.Repeat(".", i), string(c))))
 		} else {
 			for j := i + 1; j < len(word); j++ {
 				if word[j] == c && g[j] != c {
 					r = wordler.ELSEWHERE
 					word = word[:j] + " " + word[j+1:] // prevent additional matches on this letter
+					w.remaining.KeepOnly(regexp.MustCompile(string(c)))
+					w.remaining.Delete(regexp.MustCompile(fmt.Sprintf("^%s[^%s]", strings.Repeat(".", i), string(c))))
 					break
 				}
+			}
+
+			if r == wordler.NIL {
+				w.remaining.Delete(regexp.MustCompile(string(c)))
 			}
 		}
 		response = append(response, r)
