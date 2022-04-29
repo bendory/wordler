@@ -10,9 +10,10 @@ import (
 const (
 	RIGHT_LETTER_RIGHT_PLACE = '+'
 	RIGHT_LETTER_WRONG_PLACE = '*'
-	LETTER_NOT_IN_WORD       = ' '
+	LETTER_NOT_IN_WORD       = '_'
 )
 
+// Guesser is a wordle guesser.
 type Guesser struct {
 	w *wordlist.WordList
 }
