@@ -25,7 +25,7 @@ func TestNew(t *testing.T) {
 	f := &fakeLoader{words: list}
 	wordlist.Loader = f
 
-	p, err := New(true)
+	p, err := New(&Args{Hard: true, WordLength: 3})
 	if err != nil {
 		t.Errorf("error: %v", err)
 	}
@@ -40,9 +40,15 @@ func TestNew(t *testing.T) {
 	}
 
 	f.err = errors.New("some error")
-	p, err = New(true)
+	p, err = New(nil)
 	if err == nil {
 		t.Error("want error, got nil")
+	}
+
+	f.err = nil
+	p, err = New(&Args{WordLength: 0})
+	if want, got := NoWordsRemainingErr, err; want != got {
+		t.Errorf("want %v, got %v", want, got)
 	}
 }
 
@@ -53,7 +59,7 @@ func TestValidate(t *testing.T) {
 		remaining:        wordlist.New(list),
 		word:             list[0],
 		remainingGuesses: defaultGuesses,
-		strict:           true,
+		hard:             true,
 	}
 	if got := p.validate(list[0]); got != nil {
 		t.Errorf("want nil; got %#v", got)
@@ -61,14 +67,19 @@ func TestValidate(t *testing.T) {
 	if want, got := NotInDictionaryErr, p.validate("bogus"); want != got {
 		t.Errorf("want %#v; got %#v", want, got)
 	}
-	p.remaining = wordlist.New([]string{})
+
+	p.remaining = wordlist.New([]string{""})
 	if want, got := InvalidGuessErr, p.validate(list[0]); want != got {
 		t.Errorf("want %#v; got %#v", want, got)
 	}
-
-	p.strict = false
+	p.hard = false
 	if got := p.validate(list[0]); got != nil {
 		t.Errorf("want nil; got %#v", got)
+	}
+
+	p.remaining = nil
+	if want, got := NoWordsRemainingErr, p.validate(list[0]); want != got {
+		t.Errorf("want %#v; got %#v", want, got)
 	}
 }
 
@@ -116,7 +127,7 @@ func TestGuess(t *testing.T) {
 				remaining:        wordlist.New(c.list),
 				word:             c.word,
 				remainingGuesses: defaultGuesses,
-				strict:           true,
+				hard:             true,
 			}
 
 			if want, got := len(c.list), p.Words(); want != got {
@@ -146,7 +157,7 @@ func TestRemaining(t *testing.T) {
 		remaining:        wordlist.New(list),
 		word:             list[len(list)-1],
 		remainingGuesses: defaultGuesses,
-		strict:           true,
+		hard:             true,
 	}
 
 	// A rejected guess should not consume a remaining guess.

@@ -18,26 +18,45 @@ type Wordle struct {
 	remaining        *wordlist.WordList // words remaining
 	word             string             // the answer
 	remainingGuesses int                // how many guesses are left
-	strict           bool               // strict or lenient?
+	hard             bool               // hard or easy rules?
+}
+
+type Args struct {
+	Hard                bool
+	WordLength, Guesses int
+	Options             []wordlist.Option
 }
 
 var (
-	InvalidGuessErr    = errors.New("invalid guess")
-	NotInDictionaryErr = errors.New("not in dictionary")
-	OutOfGuessesErr    = errors.New("no remaining guesses")
-	verbose            = false
+	InvalidGuessErr     = errors.New("invalid guess")
+	NotInDictionaryErr  = errors.New("not in dictionary")
+	NoWordsRemainingErr = errors.New("no words remaining")
+	OutOfGuessesErr     = errors.New("no remaining guesses")
+	verbose             = false
 )
 
 // New creates a new Wordle puzzle, limiting allowed words based on given
 // options.
-func New(strict bool, options ...wordlist.Option) (*Wordle, error) {
+func New(a *Args) (*Wordle, error) {
+	if a == nil {
+		a = &Args{
+			Hard:       true,
+			WordLength: wordler.WORD_LENGTH,
+			Guesses:    defaultGuesses,
+		}
+	}
+	a.Options = append(a.Options, wordlist.KeepOnlyOption{Exp: regexp.MustCompile(fmt.Sprintf("^[a-z]{%d}$", a.WordLength))})
+
 	var err error
-	w := &Wordle{remainingGuesses: defaultGuesses, strict: strict}
-	if w.dict, err = wordlist.NewDictionary(options...); err != nil {
+	w := &Wordle{remainingGuesses: a.Guesses, hard: a.Hard}
+	if w.dict, err = wordlist.NewDictionary(a.Options...); err != nil {
 		return nil, err
 	}
-	if w.remaining, err = wordlist.NewDictionary(options...); err != nil {
+	if w.remaining, err = wordlist.NewDictionary(a.Options...); err != nil {
 		return nil, err
+	}
+	if w.Words() == 0 {
+		return nil, NoWordsRemainingErr
 	}
 	w.word = w.dict.Random()
 	return w, nil
@@ -111,12 +130,15 @@ func (w *Wordle) Guess(g string) (string, error) {
 	return g, nil
 }
 
-// validate guess based on strictness setting.
+// validate guess based on `hard` setting.
 func (w *Wordle) validate(g string) error {
 	if !w.dict.Contains(g) {
 		return NotInDictionaryErr
 	}
-	if w.strict && !w.remaining.Contains(g) {
+	if w.Words() == 0 {
+		return NoWordsRemainingErr
+	}
+	if w.hard && !w.remaining.Contains(g) {
 		return InvalidGuessErr
 	}
 	return nil
@@ -132,7 +154,7 @@ func (w *Wordle) Guesses() int {
 
 // Words returns the number of words remaining. The wordle puzzle tracks words
 // remaining assuming you apply all guess responses correctly and only guess
-// using strict rules.
+// using `hard` rules.
 func (w *Wordle) Words() int {
 	if w == nil {
 		return 0
