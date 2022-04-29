@@ -10,11 +10,19 @@ Solver will solve your wordle for you!
 ## Puzzler
 Puzzler will run a wordle for you.
 
-## Current statistics
+## Statistics
 
-* 1000 6-guess iterations on 5-letter worldles
-* 91.5% success rate
-* Average guesses to win: 4.55 guesses
+All stats are based on 1000 6-guess iterations on 5-letter worldles.
+
+* Each guess is simply a random choice:
+	* 91.5% success rate
+	* Average guesses to win: 4.55 guesses
+* Optimize guess based *only* on letter frequency:
+	* 79.0% success rate
+	* Average guesses to win: 4.91 guesses
+	* This is *worse than random* because words with repeated common letters
+	  become optimal -- the first guess is always 'arara', which only includes 2
+	  letters!
 
 
 ## TODO
