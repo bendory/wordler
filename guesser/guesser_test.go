@@ -74,24 +74,24 @@ func TestReact(t *testing.T) {
 		guess, response string
 		remaining       *wordlist.WordList
 	}{
-		{"bar", strings.Repeat(string(RIGHT_LETTER_RIGHT_PLACE), 3), wordlist.New([]string{"bar"})},
-		{"###", strings.Repeat(string(LETTER_NOT_IN_WORD), 3), wordlist.New(testList)},
-		{"abc", strings.Repeat(string(LETTER_NOT_IN_WORD), 3), wordlist.New([]string{"foo"})},
+		{"bar", strings.Repeat(string(CORRECT), 3), wordlist.New([]string{"bar"})},
+		{"###", strings.Repeat(string(NIL), 3), wordlist.New(testList)},
+		{"abc", strings.Repeat(string(NIL), 3), wordlist.New([]string{"foo"})},
 		{
 			"b##",
-			string(RIGHT_LETTER_WRONG_PLACE) + string(LETTER_NOT_IN_WORD) + string(LETTER_NOT_IN_WORD),
+			string(ELSEWHERE) + string(NIL) + string(NIL),
 			wordlist.New([]string{"zbz"}),
 		}, {
 			"#oz",
-			string(LETTER_NOT_IN_WORD) + string(LETTER_NOT_IN_WORD) + string(RIGHT_LETTER_WRONG_PLACE),
+			string(NIL) + string(NIL) + string(ELSEWHERE),
 			wordlist.New([]string{"zap"}),
 		}, {
 			"zfo",
-			string(LETTER_NOT_IN_WORD) + string(RIGHT_LETTER_WRONG_PLACE) + string(RIGHT_LETTER_RIGHT_PLACE),
+			string(NIL) + string(ELSEWHERE) + string(CORRECT),
 			wordlist.New([]string{"foo"}),
 		}, {
 			"b#r",
-			string(RIGHT_LETTER_RIGHT_PLACE) + string(LETTER_NOT_IN_WORD) + string(RIGHT_LETTER_RIGHT_PLACE),
+			string(CORRECT) + string(NIL) + string(CORRECT),
 			wordlist.New([]string{"bar"}),
 		},
 	}
@@ -127,15 +127,31 @@ func TestRemaining(t *testing.T) {
 }
 
 func TestDoubleLetters(t *testing.T) {
-	g := &Guesser{w: wordlist.New([]string{"forty"})}
-	guess := "worry"
-	response := string([]byte{LETTER_NOT_IN_WORD, RIGHT_LETTER_RIGHT_PLACE, RIGHT_LETTER_RIGHT_PLACE, LETTER_NOT_IN_WORD, RIGHT_LETTER_RIGHT_PLACE})
-	g.React(guess, response)
-	if g.Remaining() != 1 {
-		t.Errorf("want 1, got %d", g.Remaining())
+	cases := []struct {
+		guess    string
+		response []byte
+	}{
+		{
+			guess:    "worry",
+			response: []byte{NIL, CORRECT, CORRECT, NIL, CORRECT},
+		}, {
+			guess:    "robot",
+			response: []byte{ELSEWHERE, CORRECT, NIL, NIL, ELSEWHERE},
+		},
 	}
-	want := wordlist.New([]string{"forty"})
-	if !want.Equals(g.w) {
-		t.Errorf("want %#v; got %#v", want, g.w)
+
+	for _, c := range cases {
+		t.Run(c.guess, func(t *testing.T) {
+			g := &Guesser{w: wordlist.New([]string{"forty"})}
+			response := string(c.response)
+			g.React(c.guess, response)
+			if g.Remaining() != 1 {
+				t.Errorf("want 1, got %d", g.Remaining())
+			}
+			want := wordlist.New([]string{"forty"})
+			if !want.Equals(g.w) {
+				t.Errorf("want %#v; got %#v", want, g.w)
+			}
+		})
 	}
 }

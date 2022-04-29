@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	RIGHT_LETTER_RIGHT_PLACE = '+'
-	RIGHT_LETTER_WRONG_PLACE = '*'
-	LETTER_NOT_IN_WORD       = '_'
+	CORRECT   = '+'
+	ELSEWHERE = '*'
+	NIL       = '_'
 )
 
 var verbose = false
@@ -92,17 +92,17 @@ func (g *Guesser) React(guess, response string) {
 		c := guess[i]
 
 		switch r {
-		case RIGHT_LETTER_RIGHT_PLACE:
+		case CORRECT:
 			matches++
 			keepOnly += string(c)
 			g.have[c] = true
 
-		case RIGHT_LETTER_WRONG_PLACE:
+		case ELSEWHERE:
 			keepOnly += "[^" + string(c) + "]"
 			g.w.KeepOnly(regexp.MustCompile(string(c)))
 			g.have[c] = true
 
-		case LETTER_NOT_IN_WORD:
+		case NIL:
 			keepOnly += "."
 			if !g.have[c] {
 				g.w.Delete(regexp.MustCompile(string(c)))
