@@ -1,6 +1,7 @@
 package wordler
 
 import (
+	"errors"
 	"testing"
 
 	"wordler/wordlist"
@@ -17,7 +18,10 @@ func (f fakeLoader) Load(options ...wordlist.Option) (*wordlist.WordList, error)
 
 func TestNew(t *testing.T) {
 	list := []string{"foo", "bar", "bam", "zap"}
-	wordlist.Loader = fakeLoader{words: list}
+	was := wordlist.Loader
+	defer func() { wordlist.Loader = was }()
+	f := &fakeLoader{words: list}
+	wordlist.Loader = f
 
 	p, err := New(true)
 	if err != nil {
@@ -31,5 +35,38 @@ func TestNew(t *testing.T) {
 	}
 	if !p.dict.Contains(p.word) {
 		t.Errorf("dict is missing %v", p.word)
+	}
+
+	f.err = errors.New("some error")
+	p, err = New(true)
+	if err == nil {
+		t.Error("want error, got nil")
+	}
+}
+
+func TestValidate(t *testing.T) {
+	list := []string{"foo", "bar", "bam", "zap"}
+	was := wordlist.Loader
+	defer func() { wordlist.Loader = was }()
+	wordlist.Loader = fakeLoader{words: list}
+
+	p, err := New(true)
+	if err != nil {
+		t.Errorf("error: %v", err)
+	}
+	if got := p.validate(list[0]); got != nil {
+		t.Errorf("want nil; got %#v", got)
+	}
+	if want, got := NotInDictionaryErr, p.validate("bogus"); want != got {
+		t.Errorf("want %#v; got %#v", want, got)
+	}
+	p.remaining = wordlist.New([]string{})
+	if want, got := InvalidGuessErr, p.validate(list[0]); want != got {
+		t.Errorf("want %#v; got %#v", want, got)
+	}
+
+	p.strict = false
+	if got := p.validate(list[0]); got != nil {
+		t.Errorf("want nil; got %#v", got)
 	}
 }
