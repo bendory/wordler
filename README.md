@@ -53,7 +53,9 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
 	* [ ] Optimize further! `egrep ^.ater$ /usr/share/dict/words` reveals a
 	  pathological case where `bater` can take 8 guesses. Optimized solver
 	  should seek to avoid these pathological cases by avoiding guesses that
-	  used a pattern of letters repeated in other words.
+	  use a pattern of letters repeated in other words. Another test case:
+	  `baker` is solved ~34% of the time with the current algorithm due to
+	  all the `^.aker$` words.
 * [x] connect puzzler to solver
     * [x] gather statistics on iterations
 	* [ ] There's a resource leak somewhere in `wordler/main` such that it slows
