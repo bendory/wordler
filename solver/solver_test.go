@@ -109,8 +109,14 @@ func TestReact(t *testing.T) {
 	}
 
 	// guess and response are expected to be same length.
-	if err := (&Solver{}).React("some guess", "reponse of different length"); err == nil {
-		t.Errorf("want error, got nil")
+	// test response validation
+	s := &Solver{}
+	for _, r := range []string{"", "+", "__________", "++ _", "_*+ ", " **+"} {
+		t.Run(r, func(t *testing.T) {
+			if err := s.React("this", r); err == nil {
+				t.Error("want error, got nil")
+			}
+		})
 	}
 }
 

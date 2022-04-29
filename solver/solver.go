@@ -45,8 +45,9 @@ func (s *Solver) Guess() string {
 // React "reacts" to the scored guess by filtering out excluded words from our
 // WordList.
 func (s *Solver) React(guess, response string) error {
-	if len(guess) != len(response) {
-		return fmt.Errorf("response len(%v)==%d does not match guess len(%v)==%d", response, len(response), guess, len(guess))
+	pattern := fmt.Sprintf("^[%s]{%d}$", []byte{wordler.CORRECT, wordler.ELSEWHERE, wordler.NIL}, len(guess))
+	if r := regexp.MustCompile(pattern); !r.MatchString(response) {
+		return fmt.Errorf("invalid response: response must match %#v", pattern)
 	}
 	if s.have == nil {
 		s.have = make(map[byte]bool)
