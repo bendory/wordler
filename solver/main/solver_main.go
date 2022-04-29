@@ -13,6 +13,11 @@ import (
 
 func main() {
 	length := flag.Int("length", wordler.DEFAULT_WORD_LENGTH, "word length")
+	usage := flag.Usage
+	flag.Usage = func() {
+		usage()
+		fmt.Fprintf(flag.CommandLine.Output(), "\nRemaining positional arguments are taken as guesses to feed to solver.\n")
+	}
 	flag.Parse()
 
 	fmt.Println("I'm a wordle solver! I'll make guesses, you tell me wordle's response.")
@@ -31,6 +36,7 @@ func main() {
 		os.Exit(2)
 	}
 
+	clGuesses := flag.Args()
 	for {
 		switch g.Remaining() {
 		case 0:
@@ -44,7 +50,13 @@ func main() {
 		default:
 			fmt.Printf("I've got %d possible words left.\n", g.Remaining())
 
-			guess := g.Guess()
+			var guess string
+			if len(clGuesses) > 0 {
+				guess = clGuesses[0]
+				clGuesses = clGuesses[1:]
+			} else {
+				guess = g.Guess()
+			}
 			fmt.Println("Guess: " + guess)
 
 			for done := false; !done; {
