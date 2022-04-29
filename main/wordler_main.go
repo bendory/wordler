@@ -119,7 +119,7 @@ func main() {
 			count.winners++
 			count.winningIteration += float32(args.Guesses - p.Guesses())
 		} else if p.Guesses() == 0 {
-			fmt.Println("YOU LOSE!")
+			fmt.Println("  YOU LOSE!")
 		}
 		fmt.Printf("  The solution is '%v'.\n", p.GiveUp())
 		fmt.Println()
