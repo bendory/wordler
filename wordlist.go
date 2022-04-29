@@ -6,12 +6,16 @@ import (
 )
 
 type WordList struct {
-	words []string
+	words map[string]bool
 }
 
 // NewWordList creates a new WordList containing the words in s.
 func NewWordList(s []string) *WordList {
-	return &WordList{words: s[:]} // copy s
+	m := make(map[string]bool)
+	for _, word := range s {
+		m[word] = true
+	}
+	return &WordList{m}
 }
 
 // Equals compares two WordLists and returns true if they contain the same
@@ -26,17 +30,7 @@ func (this *WordList) Equals(that *WordList) bool {
 		return this == nil
 	}
 
-	thisM := make(map[string]bool)
-	thatM := make(map[string]bool)
-
-	for _, w := range this.words {
-		thisM[w] = true
-	}
-	for _, w := range that.words {
-		thatM[w] = true
-	}
-
-	return reflect.DeepEqual(thisM, thatM)
+	return reflect.DeepEqual(this.words, that.words)
 }
 
 // Length returns the number of words in the list.
@@ -63,12 +57,9 @@ func (w *WordList) filter(r *regexp.Regexp, omit bool) {
 	if w == nil {
 		return
 	}
-	last := w.Length() - 1
-	for i := last; i >= 0; i-- {
-		if omit == r.MatchString(w.words[i]) {
-			w.words[i], w.words[last] = w.words[last], w.words[i]
-			last--
+	for word, _ := range w.words {
+		if omit == r.MatchString(word) {
+			delete(w.words, word)
 		}
 	}
-	w.words = w.words[:last+1]
 }

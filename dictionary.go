@@ -25,3 +25,11 @@ func NewDictionary() (Dictionary, error) {
 	}
 	return Dictionary{NewWordList(lines)}, scanner.Err()
 }
+
+// Contains returns true if word is in the dictionary.
+func (d Dictionary) Contains(word string) bool {
+	if d.Length() == 0 { // This checks if *WordList is nil.
+		return false
+	}
+	return d.words[word]
+}
