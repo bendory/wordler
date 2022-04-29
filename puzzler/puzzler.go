@@ -22,8 +22,8 @@ type Wordle struct {
 }
 
 var (
-	NotInDictionaryErr = errors.New("not in dictionary")
 	InvalidGuessErr    = errors.New("invalid guess")
+	NotInDictionaryErr = errors.New("not in dictionary")
 	verbose            = false
 )
 
