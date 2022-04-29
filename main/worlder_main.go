@@ -18,6 +18,8 @@ type stats struct {
 	winningIteration                                            float32
 }
 
+var verbosity int = -1
+
 func main() {
 	args := &puzzler.Args{}
 	flag.BoolVar(&args.Hard, "hard", true, "use hard rules: 'Any revealed hints must be used in subsequent guesses'")
@@ -25,6 +27,7 @@ func main() {
 	flag.IntVar(&args.Guesses, "guesses", wordler.DEFAULT_GUESSES, "number of guesses allowed")
 	flag.StringVar(&args.Solution, "solution", "", "puzzler will use the specified solution")
 	iterations := flag.Int("iterations", 10, "number of iterations to run")
+	flag.IntVar(&verbosity, "verbosity", verbosity, "-1 (no debug output); 0+ increasing verbosity")
 	usage := flag.Usage
 	flag.Usage = func() {
 		usage()
@@ -71,9 +74,9 @@ func main() {
 		var guess, response string
 		for p.Guesses() > 0 {
 			if p.Words() != s.Remaining() {
-				fmt.Printf("  ERROR: %d Puzzler words != %d Solver words (continuing anyway)", p.Words(), s.Remaining())
+				fmt.Printf("  ERROR: %d Puzzler words != %d Solver words (continuing anyway)\n", p.Words(), s.Remaining())
 			}
-			fmt.Printf("  %d guesses and %d words remain.\n", p.Guesses(), p.Words())
+			debug(0, "  %d guesses and %d words remain.", p.Guesses(), p.Words())
 
 		GUESS:
 			for {
@@ -104,7 +107,7 @@ func main() {
 				fmt.Printf("  WINNER! '%v' is the word!\n", guess)
 				break
 			} else {
-				fmt.Printf("  '%v' --> '%v'\n", guess, response)
+				debug(1, "  '%v' --> '%v'", guess, response)
 				if err = s.React(guess, response); err != nil {
 					count.badReactions++
 					fmt.Printf("  ERROR: guess '%v' --> %v\n", guess, err)
@@ -124,4 +127,12 @@ func main() {
 
 	count.winningIteration /= float32(count.iterations)
 	fmt.Printf("Stats gathered: %#v\n", count)
+}
+
+// debug prints debug logs
+func debug(level int, f string, args ...interface{}) {
+	if level <= verbosity {
+		fmt.Printf(f, args...)
+		fmt.Println()
+	}
 }
