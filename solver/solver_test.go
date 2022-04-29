@@ -156,6 +156,22 @@ func TestDoubleLetters(t *testing.T) {
 		word:     "foyer",
 		guess:    "carer",
 		response: []byte{wordler.NIL, wordler.NIL, wordler.NIL, wordler.CORRECT, wordler.CORRECT},
+	}, {
+		word:     "ab",
+		guess:    "aa",
+		response: []byte{wordler.CORRECT, wordler.NIL},
+	}, {
+		word:     "aab",
+		guess:    "baa",
+		response: []byte{wordler.ELSEWHERE, wordler.CORRECT, wordler.ELSEWHERE},
+	}, {
+		word:     "aab",
+		guess:    "bab",
+		response: []byte{wordler.NIL, wordler.CORRECT, wordler.CORRECT},
+	}, {
+		word:     "aab",
+		guess:    "bba",
+		response: []byte{wordler.ELSEWHERE, wordler.NIL, wordler.ELSEWHERE},
 	}}
 
 	for _, c := range cases {

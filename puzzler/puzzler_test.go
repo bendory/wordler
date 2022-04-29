@@ -407,6 +407,21 @@ func TestSimpleDoubles(t *testing.T) {
 		guess:     "aa",
 		response:  []byte{wordler.CORRECT, wordler.NIL},
 		remaining: 1,
+	}, {
+		word:      "aab",
+		guess:     "baa",
+		response:  []byte{wordler.ELSEWHERE, wordler.CORRECT, wordler.ELSEWHERE},
+		remaining: 1,
+	}, {
+		word:      "aab",
+		guess:     "bab",
+		response:  []byte{wordler.NIL, wordler.CORRECT, wordler.CORRECT},
+		remaining: 1,
+	}, {
+		word:      "aab",
+		guess:     "bba",
+		response:  []byte{wordler.ELSEWHERE, wordler.NIL, wordler.ELSEWHERE},
+		remaining: 1,
 	}}
 
 	for _, c := range cases {
