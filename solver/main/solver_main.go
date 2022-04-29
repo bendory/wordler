@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 
 	"wordler"
 	"wordler/solver"
@@ -21,7 +20,7 @@ func main() {
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
-	g, err := solver.New(wordlist.KeepOnlyOption{Exp: regexp.MustCompile("^" + strings.Repeat(".", wordler.WORD_LENGTH) + "$")})
+	g, err := solver.New(wordlist.KeepOnlyOption{Exp: regexp.MustCompile(fmt.Sprintf("^.{%d}$", wordler.WORD_LENGTH))})
 
 	if err != nil {
 		fmt.Printf("Failed to make a Solver: %v\n", err)
