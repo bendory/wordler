@@ -37,10 +37,7 @@ func New(options ...wordlist.Option) (*Solver, error) {
 
 // Guess provides a random guess from remaining words
 func (s *Solver) Guess() string {
-	// TODO: make this a smart algorithm:
-	// - guess most common letters first
-	// - avoid guessing double letters
-	return s.w.Random()
+	return s.w.OptimalGuess()
 }
 
 // React "reacts" to the scored guess by filtering out excluded words from our

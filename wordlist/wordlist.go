@@ -146,6 +146,9 @@ func (w *WordList) Random() string {
 //
 // TODO: avoid words with double-letters when choosing the word to return
 func (w *WordList) OptimalGuess() string {
+	if w == nil {
+		return ""
+	}
 	// count letter frequencies
 	counts := make(map[int32]int)
 	for word, _ := range w.words {
