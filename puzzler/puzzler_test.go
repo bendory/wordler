@@ -381,3 +381,46 @@ func TestDoubleLetters(t *testing.T) {
 		})
 	}
 }
+
+func TestSimpleDoubles(t *testing.T) {
+	cases := []struct {
+		word, guess string
+		response    []byte
+	}{{
+		word:     "forty",
+		guess:    "worry",
+		response: []byte{wordler.NIL, wordler.CORRECT, wordler.CORRECT, wordler.NIL, wordler.CORRECT},
+	}, {
+		word:     "forty",
+		guess:    "robot",
+		response: []byte{wordler.ELSEWHERE, wordler.CORRECT, wordler.NIL, wordler.NIL, wordler.ELSEWHERE},
+	}, {
+		word:     "foyer",
+		guess:    "carer",
+		response: []byte{wordler.NIL, wordler.NIL, wordler.NIL, wordler.CORRECT, wordler.CORRECT},
+	}}
+
+	verbose = true
+	for _, c := range cases {
+		t.Run(c.guess, func(t *testing.T) {
+			list := []string{c.word, c.guess}
+			p := Wordle{
+				dict:             wordlist.New(list),
+				remaining:        wordlist.New(list),
+				word:             c.word,
+				remainingGuesses: wordler.DEFAULT_GUESSES,
+			}
+
+			response, err := p.Guess(c.guess)
+			if err != nil {
+				t.Errorf("want nil, got %v", err)
+			}
+			if want, got := string(c.response), response; want != got {
+				t.Errorf("want %v, got %v", want, got)
+			}
+			if want, got := 1, p.Words(); want != got {
+				t.Errorf("want %d words remaining, got %d", want, got)
+			}
+		})
+	}
+}

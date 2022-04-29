@@ -97,11 +97,12 @@ func (w *Wordle) Guess(g string) (string, error) {
 		c := byte(b)
 		if word[i] == c {
 			g = g[:i] + string(wordler.CORRECT) + g[i+1:]
-			word = word[:] + string(wordler.CORRECT) + word[i+1:] // prevent additional matches on this letter
+			word = word[:i] + string(wordler.CORRECT) + word[i+1:] // prevent additional matches on this letter
 			w.remaining.KeepOnly(regexp.MustCompile(fmt.Sprintf("^%s%s", strings.Repeat(".", i), string(c))))
 			lettersFound[c] = true
 		}
 	}
+	debug("after scoring %c, guess is %v, word is %v", wordler.CORRECT, g, word)
 
 	// Now score all the letters that appear ELSEWHERE in word.
 	for i, b := range g { // i is the letter's position in g
