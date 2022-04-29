@@ -5,9 +5,8 @@ import (
 	"testing"
 )
 
-var baseList = []string{"foo", "bar", "bam", "zoo"}
-
 func TestLength(t *testing.T) {
+	baseList := []string{"foo", "bar", "bam", "zoo"}
 	cases := []struct {
 		w *WordList
 		l int
@@ -28,6 +27,7 @@ func TestLength(t *testing.T) {
 }
 
 func TestEquals(t *testing.T) {
+	baseList := []string{"foo", "bar", "bam", "zoo"}
 	cases := []struct {
 		left, right *WordList
 		want        bool
@@ -50,6 +50,7 @@ func TestEquals(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	baseList := []string{"foo", "bar", "bam", "zoo"}
 	empty := New([]string{})
 	cases := []struct {
 		filter string
@@ -81,6 +82,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestKeepOnly(t *testing.T) {
+	baseList := []string{"foo", "bar", "bam", "zoo"}
 	empty := New([]string{})
 	cases := []struct {
 		filter string
@@ -112,6 +114,7 @@ func TestKeepOnly(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
+	baseList := []string{"foo", "bar", "bam", "zoo"}
 	l := baseList[:]
 
 	w := New(l)
@@ -138,7 +141,9 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestDictionary(t *testing.T) {
+// TestPlatformDictionary is non-hermetic; it loads the actual dictionary for
+// this platform.
+func TestPlatformDictionary(t *testing.T) {
 	d, err := NewDictionary()
 	if err != nil {
 		t.Errorf("Failed to load dictionary: %v", err)
@@ -152,7 +157,7 @@ func TestDictionary(t *testing.T) {
 		t.Errorf("Failed to load dictionary: %v", err)
 	}
 	if d.Length() != 1 {
-		t.Errorf("Dictionary looks small: only found %d words.", d.Length())
+		t.Errorf("want 1 word, got %d", d.Length())
 	}
 	want := New([]string{"i"})
 	if !want.Equals(d) {
@@ -161,39 +166,54 @@ func TestDictionary(t *testing.T) {
 }
 
 func TestContains(t *testing.T) {
-	d, err := NewDictionary()
-	if err != nil {
-		t.Fatalf("Failed to load dictionary: %v", err)
+	baseList := []string{"foo", "bar", "bam", "zoo"}
+	w := New(baseList)
+	if got, want := w.Length(), len(baseList); got != want {
+		t.Errorf("got %d; want %d", got, want)
 	}
 
-	if !d.Contains("toner") {
-		t.Errorf("Dictionary does not contain toner.")
+	for _, word := range baseList {
+		if !w.Contains(word) {
+			t.Errorf("Dictionary does not contain %v.", word)
+		}
 	}
-	if d.Contains("not a word") {
+	if w.Contains("not a word") {
 		t.Errorf("Dictionary contains 'not a word'.")
+	}
+	if w.Contains("") {
+		t.Errorf("Dictionary contains empty string.")
+	}
+
+	// Don't error on nil.
+	w = nil
+	if w.Contains("foo") {
+		t.Errorf("nil list contains foo")
+	}
+	if w.Length() != 0 {
+		t.Errorf("nil list has %d words", w.Length())
 	}
 }
 
 func TestOptions(t *testing.T) {
-	baselist := []string{"a", "ab", "abc"}
+	baseList := []string{"a", "ab", "abc"}
 	cases := []struct {
 		desc     string
-		baselist []string
+		baseList []string
 		options  []Option
 		want     *WordList
 	}{
-		{"K1", baselist, []Option{KeepOnlyOption{regexp.MustCompile("^..$")}}, New([]string{"ab"})},
-		{"D1", baselist, []Option{DeleteOption{regexp.MustCompile("^.$")}}, New([]string{"ab", "abc"})},
-		{"D2", baselist, []Option{DeleteOption{regexp.MustCompile("b")}}, New([]string{"a"})},
-		{"K2", baselist, []Option{KeepOnlyOption{regexp.MustCompile("c$")}}, New([]string{"abc"})},
+		{"K1", baseList, []Option{KeepOnlyOption{regexp.MustCompile("^..$")}}, New([]string{"ab"})},
+		{"D1", baseList, []Option{DeleteOption{regexp.MustCompile("^.$")}}, New([]string{"ab", "abc"})},
+		{"D2", baseList, []Option{DeleteOption{regexp.MustCompile("b")}}, New([]string{"a"})},
+		{"K2", baseList, []Option{KeepOnlyOption{regexp.MustCompile("c$")}}, New([]string{"abc"})},
 		{
 			"KD",
-			baselist,
+			baseList,
 			[]Option{KeepOnlyOption{regexp.MustCompile("..")}, DeleteOption{regexp.MustCompile("c$")}},
 			New([]string{"ab"}),
 		}, {
 			"DD",
-			baselist,
+			baseList,
 			[]Option{DeleteOption{regexp.MustCompile("^..$")}, DeleteOption{regexp.MustCompile("^a$")}},
 			New([]string{"abc"}),
 		},
@@ -201,7 +221,7 @@ func TestOptions(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			got := New(c.baselist, c.options...)
+			got := New(c.baseList, c.options...)
 			if !got.Equals(c.want) {
 				t.Errorf("want %#v; got %#v", c.want, got)
 			}

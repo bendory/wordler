@@ -13,19 +13,30 @@ type WordList struct {
 	words map[string]bool
 }
 
-var (
+var loader dictionaryLoader = &platformLoader{}
+
+// NewDictionary returns a *WordList containing /usr/share/dict/words.
+func NewDictionary(options ...Option) (*WordList, error) {
+	return loader.load(options...)
+}
+
+type dictionaryLoader interface {
+	load(options ...Option) (*WordList, error)
+}
+
+// platformLoader loads dictionary on this platform.
+type platformLoader struct {
 	once           sync.Once
 	fullDictionary []string
 	err            error
-)
+}
 
-// NewDictionary returns a *WordList containing /usr/share/dict/words.
 // TODO: make this platform-independent via goos.Is*
-func NewDictionary(options ...Option) (*WordList, error) {
-	once.Do(func() {
+func (p *platformLoader) load(options ...Option) (*WordList, error) {
+	p.once.Do(func() {
 		var file *os.File
-		file, err = os.Open(`/usr/share/dict/words`)
-		if err != nil {
+		file, p.err = os.Open(`/usr/share/dict/words`)
+		if p.err != nil {
 			return
 		}
 		defer file.Close()
@@ -39,11 +50,11 @@ func NewDictionary(options ...Option) (*WordList, error) {
 					continue SCAN
 				}
 			}
-			fullDictionary = append(fullDictionary, word)
+			p.fullDictionary = append(p.fullDictionary, word)
 		}
-		err = scanner.Err()
+		p.err = scanner.Err()
 	})
-	return New(fullDictionary, options...), err
+	return New(p.fullDictionary, options...), p.err
 }
 
 // New creates a new WordList containing the words in s.
