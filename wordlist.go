@@ -3,9 +3,9 @@ package wordler
 import (
 	"bufio"
 	"os"
-	"strings"
 	"reflect"
 	"regexp"
+	"strings"
 )
 
 type WordList struct {
