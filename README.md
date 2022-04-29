@@ -8,7 +8,7 @@ WordList is just a list of words.
 Solver will solve your wordle for you!
 
 ## Puzzler
-Puzzler will run a worlde for you.
+Puzzler will run a wordle for you.
 
 ## TODO
 * [x] make wordle puzzle, give feedback on guesses
