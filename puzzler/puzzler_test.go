@@ -74,32 +74,39 @@ func TestValidate(t *testing.T) {
 }
 
 func TestGuess(t *testing.T) {
-	list := []string{"foo", "bar", "bam", "zap"}
-	was := wordlist.Loader
-	defer func() { wordlist.Loader = was }()
-	wordlist.Loader = fakeLoader{words: list}
-
 	cases := []struct {
+		list        []string
 		guess, word string
 		response    *Response
 		err         error
 	}{{
-		guess:    list[1],
-		word:     list[0],
+		list:     []string{"foo", "bar", "bam", "zap"},
+		guess:    "bar",
+		word:     "foo",
 		response: &Response{Detail: string([]byte{wordler.NIL, wordler.NIL, wordler.NIL}), WordsRemaining: 1},
 	}, {
-		guess:    list[0],
-		word:     list[0],
+		list:     []string{"foo", "bar", "bam", "zap"},
+		guess:    "foo",
+		word:     "foo",
 		response: &Response{Detail: string([]byte{wordler.CORRECT, wordler.CORRECT, wordler.CORRECT}), WordsRemaining: 1},
 	}, {
-		guess:    list[2],
-		word:     list[1],
+		list:     []string{"foo", "bar", "bam", "zap"},
+		guess:    "bam",
+		word:     "bar",
 		response: &Response{Detail: string([]byte{wordler.CORRECT, wordler.CORRECT, wordler.NIL}), WordsRemaining: 1},
-		// TODO: test ELSEWHERE values too
+	}, {
+		list:     []string{"foo", "bar", "bam", "zap", "pta"},
+		guess:    "pta",
+		word:     "zap",
+		response: &Response{Detail: string([]byte{wordler.ELSEWHERE, wordler.NIL, wordler.ELSEWHERE}), WordsRemaining: 1},
 	}}
 
 	for _, c := range cases {
 		t.Run(fmt.Sprint("g:", c.guess, "+w:", c.word), func(t *testing.T) {
+			was := wordlist.Loader
+			defer func() { wordlist.Loader = was }()
+			wordlist.Loader = fakeLoader{words: c.list}
+
 			p, err := New(true)
 			if err != nil {
 				t.Errorf("error: %v", err)
