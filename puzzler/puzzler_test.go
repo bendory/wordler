@@ -99,6 +99,11 @@ func TestGuess(t *testing.T) {
 		guess:    "pta",
 		word:     "zap",
 		response: &Response{Detail: string([]byte{wordler.ELSEWHERE, wordler.NIL, wordler.ELSEWHERE}), WordsRemaining: 1},
+	}, {
+		list:  []string{"a"},
+		guess: "b",
+		word:  "a",
+		err:   NotInDictionaryErr,
 	}}
 
 	for _, c := range cases {
@@ -115,6 +120,8 @@ func TestGuess(t *testing.T) {
 			response, err := p.Guess(c.guess)
 			if err != c.err {
 				t.Errorf("want %v; got %v", c.err, err)
+			} else if err != nil {
+				return
 			}
 			if want, got := c.response.Detail, response.Detail; want != got {
 				t.Errorf("want %v; got %v", want, got)
