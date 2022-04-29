@@ -129,6 +129,16 @@ func (s *Solver) Remaining() int {
 	return s.w.Length()
 }
 
+// NotInWordle is used to report that the word is not found in the wordle
+// dictionary; the word is removed from our list of remaining entries.
+func (s *Solver) NotInWordle(not string) {
+	if s == nil || s.w == nil {
+		return
+	}
+	s.w.Delete(regexp.MustCompile("^" + not + "$"))
+}
+
+// debug prints debug logs
 func debug(f string, args ...interface{}) {
 	if verbose {
 		fmt.Printf(f, args...)

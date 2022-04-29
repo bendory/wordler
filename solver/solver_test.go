@@ -172,3 +172,19 @@ func TestDoubleLetters(t *testing.T) {
 		t.Errorf("want %#v; got %#v", want, g.w)
 	}
 }
+
+func TestNotInWordle(t *testing.T) {
+	s := &Solver{w: wordlist.New([]string{"a", "b", "c"})}
+
+	s.NotInWordle("b")
+	want := wordlist.New([]string{"a", "c"})
+
+	if !want.Equals(s.w) {
+		t.Errorf("want %#v; got %#v", want, s.w)
+	}
+
+	s.NotInWordle("ac")
+	if !want.Equals(s.w) {
+		t.Errorf("want %#v; got %#v", want, s.w)
+	}
+}
