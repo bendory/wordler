@@ -60,18 +60,18 @@ func (g *Guesser) React(guess, response string) {
 			matchFilter += "."
 			missFilter += string(c)
 		}
+	}
 
-		switch matches {
-		case 0:
-			// do nothing; no matches
-		case len(guess):
-			// complete match!
-			g.w = wordlist.New([]string{guess})
-		default:
-			// we found some matches, but not a complete match
-			matchFilter += "$"
-			g.w.KeepOnly(regexp.MustCompile(matchFilter))
-		}
+	switch matches {
+	case 0:
+		// do nothing; no matches
+	case len(guess):
+		// complete match!
+		g.w = wordlist.New([]string{guess})
+	default:
+		// we found some matches, but not a complete match
+		matchFilter += "$"
+		g.w.KeepOnly(regexp.MustCompile(matchFilter))
 	}
 
 	if len(missFilter) > 0 {

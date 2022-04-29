@@ -65,6 +65,10 @@ func TestReact(t *testing.T) {
 			"zfo",
 			string(LETTER_NOT_IN_WORD) + string(RIGHT_LETTER_WRONG_PLACE) + string(RIGHT_LETTER_RIGHT_PLACE),
 			wordlist.New([]string{"foo"}),
+		}, {
+			"b$r",
+			string(RIGHT_LETTER_RIGHT_PLACE) + string(LETTER_NOT_IN_WORD) + string(RIGHT_LETTER_RIGHT_PLACE),
+			wordlist.New([]string{"bar"}),
 		},
 	}
 
