@@ -25,11 +25,27 @@ func main() {
 	flag.IntVar(&args.Guesses, "guesses", wordler.DEFAULT_GUESSES, "number of guesses allowed")
 	flag.StringVar(&args.Solution, "solution", "", "puzzler will use the specified solution")
 	iterations := flag.Int("iterations", 10, "number of iterations to run")
+	usage := flag.Usage
+	flag.Usage = func() {
+		usage()
+		fmt.Fprintf(flag.CommandLine.Output(), "\nRemaining positional arguments are taken as guesses to feed to solver.\n")
+	}
 	flag.Parse()
+	clGuesses := flag.Args()
 
 	fmt.Println("I'm a wordler! I try to solve wordle puzzles and report on my success.")
 	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", args.WordLength)
 	fmt.Printf("I allow %d guesses for each of %d iterations.\n", args.Guesses, *iterations)
+	if args.Solution != "" {
+		fmt.Printf("I'll always use '%v' as my solution.\n", args.Solution)
+	}
+	if len(clGuesses) > 0 {
+		fmt.Printf("My first guesses, in order, will be %v.\n", strings.Join(clGuesses, ", "))
+		if args.Solution != "" && *iterations != 1 {
+			fmt.Println("NOTE: flags set both solution and guesses; setting iterations to 1.")
+			*iterations = 1
+		}
+	}
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
@@ -61,7 +77,12 @@ func main() {
 
 		GUESS:
 			for {
-				guess = s.Guess()
+				if len(clGuesses) > 0 {
+					guess = clGuesses[0]
+					clGuesses = clGuesses[1:]
+				} else {
+					guess = s.Guess()
+				}
 				response, err = p.Guess(guess)
 				switch err {
 				case puzzler.InvalidGuessErr, puzzler.NotInDictionaryErr:
