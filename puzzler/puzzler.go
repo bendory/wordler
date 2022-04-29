@@ -24,6 +24,7 @@ type Wordle struct {
 var (
 	InvalidGuessErr    = errors.New("invalid guess")
 	NotInDictionaryErr = errors.New("not in dictionary")
+	OutOfGuessesErr    = errors.New("no remaining guesses")
 	verbose            = false
 )
 
@@ -42,18 +43,17 @@ func New(strict bool, options ...wordlist.Option) (*Wordle, error) {
 	return w, nil
 }
 
-type Response struct {
-	Detail                           string
-	WordsRemaining, GuessesRemaining int
-}
-
 // Guess the given word.
-func (w *Wordle) Guess(g string) (*Response, error) {
+// The returned string is populated with wordler.CORRECT, wordler.NIL,
+// wordler.ELSEWHERE corresponding to the guess.
+func (w *Wordle) Guess(g string) (string, error) {
+	if w == nil || w.remainingGuesses == 0 {
+		return "", OutOfGuessesErr
+	}
 	if err := w.validate(g); err != nil {
-		return nil, err
+		return "", err
 	}
 	w.remainingGuesses--
-	r := &Response{GuessesRemaining: w.remainingGuesses}
 
 	word := w.word
 
@@ -108,9 +108,7 @@ func (w *Wordle) Guess(g string) (*Response, error) {
 	}
 
 	// g is now a combination of CORRECT, ELSEWHERE, and NIL
-	r.Detail = g
-	r.WordsRemaining = w.remaining.Length()
-	return r, nil
+	return g, nil
 }
 
 // validate guess based on strictness setting.
@@ -122,6 +120,34 @@ func (w *Wordle) validate(g string) error {
 		return InvalidGuessErr
 	}
 	return nil
+}
+
+// Guesses returns the number of guesses left.
+func (w *Wordle) Guesses() int {
+	if w == nil {
+		return 0
+	}
+	return w.remainingGuesses
+}
+
+// Words returns the number of words remaining. The wordle puzzle tracks words
+// remaining assuming you apply all guess responses correctly and only guess
+// using strict rules.
+func (w *Wordle) Words() int {
+	if w == nil {
+		return 0
+	}
+	return w.remaining.Length()
+}
+
+// GiveUp: no more guesses are allowed and the solution is revealed.
+func (w *Wordle) GiveUp() string {
+	if w == nil {
+		return ""
+	}
+	w.remainingGuesses = 0
+	w.remaining = wordlist.New([]string{w.word})
+	return w.word
 }
 
 // debug prints debug logs
