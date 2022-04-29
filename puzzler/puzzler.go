@@ -48,7 +48,7 @@ func (w *Wordle) Guess(g string) (wordsRemaining, guessesRemaining int, err erro
 	return w.remaining.Length(), w.remainingGuesses, err
 }
 
-// validate guess based on strict setting.
+// validate guess based on strictness setting.
 func (w *Wordle) validate(g string) error {
 	if !w.dict.Contains(g) {
 		return NotInDictionaryErr
