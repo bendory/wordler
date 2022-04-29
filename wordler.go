@@ -5,7 +5,7 @@ const (
 	DEFAULT_WORD_LENGTH = 5
 
 	// DEFAULT_GUESSES is the default number of guesses.
-	DEFAULT_GUESSES = 5
+	DEFAULT_GUESSES = 6
 
 	// CORRECT indicates that the letter is in the puzzle in the given location.
 	CORRECT = '+'
