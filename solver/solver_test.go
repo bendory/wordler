@@ -98,11 +98,18 @@ func TestReact(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.guess, func(t *testing.T) {
 			guesser := &Solver{w: wordlist.New(testList)}
-			guesser.React(c.guess, c.response)
+			if err := guesser.React(c.guess, c.response); err != nil {
+				t.Errorf("got error %v", err)
+			}
 			if want, got := c.remaining, guesser.w; !want.Equals(got) {
 				t.Errorf("want %#v != got %#v", want, got)
 			}
 		})
+	}
+
+	// guess and response are expected to be same length.
+	if err := (&Solver{}).React("some guess", "reponse of different length"); err == nil {
+		t.Errorf("want error, got nil")
 	}
 }
 
@@ -144,7 +151,9 @@ func TestDoubleLetters(t *testing.T) {
 		t.Run(c.guess, func(t *testing.T) {
 			s := &Solver{w: wordlist.New([]string{"forty"})}
 			response := string(c.response)
-			s.React(c.guess, response)
+			if err := s.React(c.guess, response); err != nil {
+				t.Errorf("Error: %v", err)
+			}
 			if s.Remaining() != 1 {
 				t.Errorf("want 1, got %d", s.Remaining())
 			}
@@ -165,7 +174,9 @@ func TestDoubleLetters(t *testing.T) {
 		},
 	}
 	response := string([]byte{NIL, NIL, CORRECT, CORRECT, CORRECT})
-	s.React("array", response)
+	if err := s.React("array", response); err != nil {
+		t.Errorf("Error: %v", err)
+	}
 	want := wordlist.New([]string{"foray"})
 	if !want.Equals(s.w) {
 		t.Errorf("want %#v; got %#v", want, s.w)

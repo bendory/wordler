@@ -77,9 +77,9 @@ func (s *Solver) Guess() string {
 
 // React "reacts" to the scored guess by filtering out excluded words from our
 // WordList.
-func (s *Solver) React(guess, response string) {
+func (s *Solver) React(guess, response string) error {
 	if len(guess) != len(response) {
-		panic(fmt.Sprintf("guess len(%v)==%d; response len(%v) == %d", guess, len(guess), response, len(response)))
+		return fmt.Errorf("response len(%v)==%d does not match guess len(%v)==%d", response, len(response), guess, len(guess))
 	}
 	if s.have == nil {
 		s.have = make(map[byte]bool)
@@ -119,6 +119,7 @@ func (s *Solver) React(guess, response string) {
 		debug("keepOnly: '%v'", keepOnly)
 		s.w.KeepOnly(regexp.MustCompile(keepOnly))
 	}
+	return nil
 }
 
 // Remaining returns the number of word remaining for guessing.

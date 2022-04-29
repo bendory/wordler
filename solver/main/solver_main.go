@@ -49,10 +49,8 @@ func main() {
 
 				if response == "n" {
 					g.NotInWordle(guess)
-				} else if len(response) != wordLength {
-					fmt.Printf("invalid response %v; response needs exactly %d characters\n", response, wordLength)
-				} else {
-					g.React(guess, response)
+				} else if err := g.React(guess, response); err != nil {
+					fmt.Println("ERROR: ", err)
 				}
 			}
 			fmt.Println()
