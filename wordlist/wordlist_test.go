@@ -1,4 +1,4 @@
-package wordler
+package wordlist
 
 import (
 	"regexp"
@@ -14,10 +14,10 @@ func TestLength(t *testing.T) {
 	}{
 		{&WordList{}, 0},
 		{nil, 0},
-		{NewWordList(baseList), len(baseList)},
-		{NewWordList(baseList), len(baseList)},
+		{New(baseList), len(baseList)},
+		{New(baseList), len(baseList)},
 		{&WordList{nil}, 0},
-		{NewWordList([]string{}), 0},
+		{New([]string{}), 0},
 	}
 
 	for _, c := range cases {
@@ -34,9 +34,9 @@ func TestEquals(t *testing.T) {
 	}{
 		{nil, nil, true},
 		{nil, &WordList{}, false},
-		{nil, NewWordList(baseList), false},
-		{NewWordList(baseList), NewWordList(baseList), true},
-		{NewWordList(baseList), NewWordList([]string{"foo"}), false},
+		{nil, New(baseList), false},
+		{New(baseList), New(baseList), true},
+		{New(baseList), New([]string{"foo"}), false},
 	}
 
 	for _, c := range cases {
@@ -50,23 +50,23 @@ func TestEquals(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	empty := NewWordList([]string{})
+	empty := New([]string{})
 	cases := []struct {
 		filter string
 		want   *WordList
 	}{
-		{".oo", NewWordList([]string{"bar", "bam"})},
-		{"ba", NewWordList([]string{"foo", "zoo"})},
-		{"....", NewWordList(baseList)},
+		{".oo", New([]string{"bar", "bam"})},
+		{"ba", New([]string{"foo", "zoo"})},
+		{"....", New(baseList)},
 		{"...", empty},
 		{"..", empty},
 		{"", empty},
-		{"nomatch", NewWordList(baseList)},
+		{"nomatch", New(baseList)},
 	}
 
 	for _, c := range cases {
 		t.Run(c.filter, func(t *testing.T) {
-			w := NewWordList(baseList)
+			w := New(baseList)
 			w.Delete(regexp.MustCompile(c.filter))
 
 			if got, want := w.Length(), c.want.Length(); got != want {
@@ -81,23 +81,23 @@ func TestDelete(t *testing.T) {
 }
 
 func TestKeepOnly(t *testing.T) {
-	empty := NewWordList([]string{})
+	empty := New([]string{})
 	cases := []struct {
 		filter string
 		want   *WordList
 	}{
-		{".oo", NewWordList([]string{"foo", "zoo"})},
-		{"ba", NewWordList([]string{"bar", "bam"})},
+		{".oo", New([]string{"foo", "zoo"})},
+		{"ba", New([]string{"bar", "bam"})},
 		{"....", empty},
-		{"...", NewWordList(baseList)},
-		{"..", NewWordList(baseList)},
-		{"", NewWordList(baseList)},
+		{"...", New(baseList)},
+		{"..", New(baseList)},
+		{"", New(baseList)},
 		{"nomatch", empty},
 	}
 
 	for _, c := range cases {
 		t.Run(c.filter, func(t *testing.T) {
-			w := NewWordList(baseList)
+			w := New(baseList)
 			w.KeepOnly(regexp.MustCompile(c.filter))
 
 			if got, want := w.Length(), c.want.Length(); got != want {
@@ -111,24 +111,24 @@ func TestKeepOnly(t *testing.T) {
 	}
 }
 
-func TestNewWordList(t *testing.T) {
+func TestNew(t *testing.T) {
 	l := baseList[:]
 
-	w := NewWordList(l)
-	want := NewWordList(baseList)
+	w := New(l)
+	want := New(baseList)
 	if !w.Equals(want) {
 		t.Errorf("got %#v, want %#v", w, want)
 	}
 
 	// Changing w should have no effect on l.
-	w2 := NewWordList(l)
+	w2 := New(l)
 	w.Delete(regexp.MustCompile("."))
 	if w.Equals(w2) {
 		t.Errorf("%#v should not equal %#v", w, w2)
 	}
 
 	// Changing l should have no effect on w.
-	w = NewWordList(l)
+	w = New(l)
 	l[0] = l[0] + " bogus"
 	if !w.Equals(want) {
 		t.Errorf("got %#v, want %#v", w, want)

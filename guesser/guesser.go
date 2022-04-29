@@ -1,8 +1,10 @@
-package wordler
+package guesser
 
 import (
 	"regexp"
 	"strings"
+
+	"wordler/wordlist"
 )
 
 const (
@@ -12,18 +14,18 @@ const (
 )
 
 type Guesser struct {
-	w *WordList
+	w *wordlist.WordList
 }
 
-// NewGuesser returns a new Guesser populated with a Dictionary.
-func NewGuesser() (*Guesser, error) {
+// New returns a new Guesser populated with a Dictionary.
+func New() (*Guesser, error) {
 	var (
 		g   *Guesser
-		w   *WordList
+		w   *wordlist.WordList
 		err error
 	)
 
-	if w, err = NewDictionary(); err == nil {
+	if w, err = wordlist.NewDictionary(); err == nil {
 		g = &Guesser{w: w}
 	}
 	return g, err
@@ -31,13 +33,7 @@ func NewGuesser() (*Guesser, error) {
 
 // Guess provides a random guess from remaining words
 func (g *Guesser) Guess() string {
-	// map iteration goes in a random order!
-	if g.w != nil {
-		for guess, _ := range g.w.words {
-			return guess
-		}
-	}
-	return ""
+	return g.w.Random()
 }
 
 // React "reacts" to the scored guess by filtering out excluded words from our
@@ -70,7 +66,7 @@ func (g *Guesser) React(guess, response string) {
 			// do nothing; no matches
 		case len(guess):
 			// complete match!
-			g.w = NewWordList([]string{guess})
+			g.w = wordlist.New([]string{guess})
 		default:
 			// we found some matches, but not a complete match
 			matchFilter += "$"
@@ -87,4 +83,12 @@ func (g *Guesser) React(guess, response string) {
 	}
 
 	return
+}
+
+// Remaining returns the number of word remaining for guessing.
+func (g *Guesser) Remaining() int {
+	if g == nil || g.w == nil {
+		return 0
+	}
+	return g.w.Length()
 }

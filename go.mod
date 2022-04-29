@@ -1,3 +1,3 @@
-module github.com/bendory/wordler
+module wordler
 
 go 1.18

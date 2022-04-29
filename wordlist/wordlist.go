@@ -1,4 +1,4 @@
-package wordler
+package wordlist
 
 import (
 	"bufio"
@@ -26,11 +26,11 @@ func NewDictionary() (*WordList, error) {
 	for scanner.Scan() {
 		lines = append(lines, strings.ToLower(scanner.Text()))
 	}
-	return NewWordList(lines), scanner.Err()
+	return New(lines), scanner.Err()
 }
 
-// NewWordList creates a new WordList containing the words in s.
-func NewWordList(s []string) *WordList {
+// New creates a new WordList containing the words in s.
+func New(s []string) *WordList {
 	m := make(map[string]bool)
 	for _, word := range s {
 		m[word] = true
@@ -90,4 +90,15 @@ func (w *WordList) Contains(word string) bool {
 		return false
 	}
 	return w.words[word]
+}
+
+// Random returns a random word from the WordList
+func (w *WordList) Random() string {
+	// map iteration goes in a random order!
+	if w != nil {
+		for guess, _ := range w.words {
+			return guess
+		}
+	}
+	return ""
 }
