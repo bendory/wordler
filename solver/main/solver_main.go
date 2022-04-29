@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"regexp"
@@ -11,8 +12,11 @@ import (
 )
 
 func main() {
+	length := flag.Int("length", wordler.DEFAULT_WORD_LENGTH, "word length")
+	flag.Parse()
+
 	fmt.Println("I'm a wordle solver! I'll make guesses, you tell me wordle's response.")
-	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", wordler.DEFAULT_WORD_LENGTH)
+	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", *length)
 	fmt.Printf("Use '%c' for \"right letter in the right place\"\n", wordler.CORRECT)
 	fmt.Printf("Use '%c' for \"right letter in the wrong place\"\n", wordler.ELSEWHERE)
 	fmt.Printf("Use '%c' for \"letter not in the word\"\n", wordler.NIL)
@@ -20,7 +24,7 @@ func main() {
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
-	g, err := solver.New(wordlist.KeepOnlyOption{Exp: regexp.MustCompile(fmt.Sprintf("^.{%d}$", wordler.DEFAULT_WORD_LENGTH))})
+	g, err := solver.New(wordlist.KeepOnlyOption{Exp: regexp.MustCompile(fmt.Sprintf("^.{%d}$", *length))})
 
 	if err != nil {
 		fmt.Printf("Failed to make a Solver: %v\n", err)
