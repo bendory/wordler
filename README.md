@@ -12,3 +12,4 @@ Dictionary loads all known words from /usr/share/dict.
 * [ ] make wordle puzzle, give feedback on guesses
 * [ ] make solver
 * [ ] connect wordler to solver
+* [ ] problem: /usr/share/dict does not include plurals
