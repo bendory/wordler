@@ -17,7 +17,8 @@ var verbose = false
 
 // Guesser is a wordle guesser.
 type Guesser struct {
-	w *wordlist.WordList
+	have map[byte]bool // letters that we know we have
+	w    *wordlist.WordList
 }
 
 // Option represents a constraint to place on the Dictionary.
@@ -56,7 +57,10 @@ func New(options ...Option) (*Guesser, error) {
 	)
 
 	if w, err = wordlist.NewDictionary(); err == nil {
-		g = &Guesser{w: w}
+		g = &Guesser{
+			have: make(map[byte]bool),
+			w:    w,
+		}
 	}
 
 	for _, o := range options {
@@ -77,6 +81,9 @@ func (g *Guesser) React(guess, response string) {
 	if len(guess) != len(response) {
 		panic(fmt.Sprintf("guess len(%v)==%d; response len(%v) == %d", guess, len(guess), response, len(response)))
 	}
+	if g.have == nil {
+		g.have = make(map[byte]bool)
+	}
 
 	matches := 0
 	keepOnly := "^" // letters in required positions
@@ -88,14 +95,18 @@ func (g *Guesser) React(guess, response string) {
 		case RIGHT_LETTER_RIGHT_PLACE:
 			matches++
 			keepOnly += string(c)
+			g.have[c] = true
 
 		case RIGHT_LETTER_WRONG_PLACE:
 			keepOnly += "[^" + string(c) + "]"
 			g.w.KeepOnly(regexp.MustCompile(string(c)))
+			g.have[c] = true
 
 		case LETTER_NOT_IN_WORD:
 			keepOnly += "."
-			g.w.Delete(regexp.MustCompile(string(c)))
+			if !g.have[c] {
+				g.w.Delete(regexp.MustCompile(string(c)))
+			}
 		}
 	}
 
@@ -108,8 +119,6 @@ func (g *Guesser) React(guess, response string) {
 		debug("keepOnly: '%v'", keepOnly)
 		g.w.KeepOnly(regexp.MustCompile(keepOnly))
 	}
-
-	return
 }
 
 // Remaining returns the number of word remaining for guessing.

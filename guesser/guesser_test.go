@@ -125,3 +125,17 @@ func TestRemaining(t *testing.T) {
 		t.Errorf("want %d, got %d", want, got)
 	}
 }
+
+func TestDoubleLetters(t *testing.T) {
+	g := &Guesser{w: wordlist.New([]string{"forty"})}
+	guess := "worry"
+	response := string([]byte{LETTER_NOT_IN_WORD, RIGHT_LETTER_RIGHT_PLACE, RIGHT_LETTER_RIGHT_PLACE, LETTER_NOT_IN_WORD, RIGHT_LETTER_RIGHT_PLACE})
+	g.React(guess, response)
+	if g.Remaining() != 1 {
+		t.Errorf("want 1, got %d", g.Remaining())
+	}
+	want := wordlist.New([]string{"forty"})
+	if !want.Equals(g.w) {
+		t.Errorf("want %#v; got %#v", want, g.w)
+	}
+}
