@@ -1,12 +1,32 @@
 package wordler
 
 import (
+	"bufio"
+	"os"
+	"strings"
 	"reflect"
 	"regexp"
 )
 
 type WordList struct {
 	words map[string]bool
+}
+
+// NewDictionary returns a *WordList containing /usr/share/dict/words.
+// TODO: make this platform-independent via goos.Is*
+func NewDictionary() (*WordList, error) {
+	file, err := os.Open(`/usr/share/dict/words`)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, strings.ToLower(scanner.Text()))
+	}
+	return NewWordList(lines), scanner.Err()
 }
 
 // NewWordList creates a new WordList containing the words in s.
@@ -62,4 +82,12 @@ func (w *WordList) filter(r *regexp.Regexp, omit bool) {
 			delete(w.words, word)
 		}
 	}
+}
+
+// Contains returns true if word is in the WordList.
+func (w *WordList) Contains(word string) bool {
+	if w == nil {
+		return false
+	}
+	return w.words[word]
 }
