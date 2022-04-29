@@ -108,3 +108,30 @@ func TestKeepOnly(t *testing.T) {
 		})
 	}
 }
+
+func TestNew(t *testing.T) {
+	l := baseList[:]
+
+	w := New(l)
+	want := &WordList{baseList}
+	if !w.Equals(want) {
+		t.Errorf("got %#v, want %#v", w, want)
+	}
+
+	// Changing w should have no effect on l.
+	w2 := &WordList{l}
+	w.Delete(regexp.MustCompile("."))
+	if w.Equals(w2) {
+		t.Errorf("%#v should not equal %#v", w, w2)
+	}
+
+	// Changing l should have no effect on w.
+	w = New(l)
+	l[0] = l[0] + " bogus"
+	if !w.Equals(want) {
+		t.Errorf("got %#v, want %#v", w, want)
+	}
+	if !w.Equals(w2) {
+		t.Errorf("got %#v, want %#v", w, w2)
+	}
+}
