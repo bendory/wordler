@@ -22,12 +22,15 @@ func (f *fakeLoader) Load(_ ...wordlist.Option) (*wordlist.WordList, error) {
 		return nil, fmt.Errorf("cannot make fake loader for wordlength %d", f.length)
 	}
 
+	// Generate a list of f.length letters
 	var list []string
 	for i := 0; i < f.length; i++ {
 		list = append(list, fmt.Sprintf("%c", 'a'+i))
 	}
 	letters := append([]string{}, list...)
 
+	// Generate every possible "word" of length f.length from the list of
+	// letters.
 	for len(list[0]) < f.length {
 		var next []string
 		for i := 0; i < len(list); i++ {
