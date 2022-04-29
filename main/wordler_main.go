@@ -27,7 +27,7 @@ func main() {
 	flag.IntVar(&args.Guesses, "guesses", wordler.DEFAULT_GUESSES, "number of guesses allowed")
 	flag.StringVar(&args.Solution, "solution", "", "puzzler will use the specified solution")
 	iterations := flag.Int("iterations", 10, "number of iterations to run")
-	flag.IntVar(&verbosity, "verbosity", verbosity, "-1 (no debug output); 0+ increasing verbosity")
+	flag.IntVar(&verbosity, "verbosity", verbosity, "-2 (silent); -1 (no debug output); 0+ increasing verbosity")
 	usage := flag.Usage
 	flag.Usage = func() {
 		usage()
@@ -58,7 +58,7 @@ func main() {
 	winningResponse := strings.Repeat(string(wordler.CORRECT), args.WordLength)
 	for i := 0; i < *iterations; i++ {
 		count.iterations++
-		fmt.Printf("Iteration %d/%d: ", i+1, *iterations)
+		debug(-1, "Iteration %d/%d: ", i+1, *iterations)
 		p, err := puzzler.New(args)
 		if err != nil {
 			fmt.Printf("Failed to make a Puzzler: %v\n", err)
@@ -69,7 +69,6 @@ func main() {
 			fmt.Printf("Failed to make a Solver: %v\n", err)
 			continue
 		}
-		fmt.Println()
 
 		var guess, response string
 		var guesses []string
@@ -106,7 +105,7 @@ func main() {
 				}
 			}
 			if response == winningResponse {
-				fmt.Printf("  WINNER! '%v' is the word!\n", guess)
+				debug(-1, "  WINNER! '%v' is the word!", guess)
 				break
 			} else {
 				debug(1, "  '%v' --> '%v'", guess, response)
@@ -121,15 +120,17 @@ func main() {
 			count.winners++
 			count.winningIteration += float32(args.Guesses - p.Guesses())
 		} else if p.Guesses() == 0 {
-			fmt.Println("  YOU LOSE!")
-			fmt.Printf("  Guesses were: %v; %d words left.\n", strings.Join(guesses, ", "), s.Remaining())
+			debug(-1, "  YOU LOSE!")
+			debug(-1, "  Guesses were: %v; %d words left.", strings.Join(guesses, ", "), s.Remaining())
 		}
-		fmt.Printf("  The solution is '%v'.\n", p.GiveUp())
-		fmt.Println()
+		debug(-1, "  The solution is '%v'.", p.GiveUp())
+		debug(-1, "")
 	}
 
 	count.winningIteration /= float32(count.winners)
-	fmt.Printf("Stats gathered: %#v\n", count)
+	debug(-1, "Stats gathered: %#v", count)
+	fmt.Printf("I won %.2f%% of games played with an average of %.2f guesses.\n",
+		float32(count.winners*100)/float32(count.iterations), count.winningIteration)
 }
 
 // debug prints debug logs
