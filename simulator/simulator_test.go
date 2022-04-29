@@ -15,43 +15,52 @@ type fakeLoader struct {
 	words  []string
 }
 
+// Load implements wordlist.DictionaryLoader.Load() by generating a list of word
+// permutations.
 func (f *fakeLoader) Load(_ ...wordlist.Option) (*wordlist.WordList, error) {
-	switch f.length {
-	case 1:
-		f.words = []string{"a", "b", "c", "d", "e"}
-	case 2:
-		f.words = []string{"aa", "ab", "ac", "ba", "bb", "bc", "ca", "cb", "cc"}
-	case 3:
-		f.words = []string{
-			"aaa", "aab", "aac",
-			"aba", "abb", "abc",
-			"aca", "acb", "acc",
-			"baa", "bab", "bac",
-			"bba", "bbb", "bbc",
-			"bca", "bcb", "bcc",
-			"caa", "cab", "cac",
-			"cba", "cbb", "cbc",
-			"cca", "ccb", "ccc",
-		}
-	default:
+	if f.length < 2 || f.length > 5 {
 		return nil, fmt.Errorf("cannot make fake loader for wordlength %d", f.length)
 	}
+
+	var list []string
+	for i := 0; i < f.length; i++ {
+		list = append(list, fmt.Sprintf("%c", 'a'+i))
+	}
+	letters := append([]string{}, list...)
+
+	for len(list[0]) < f.length {
+		var next []string
+		for i := 0; i < len(list); i++ {
+			for _, l := range letters {
+				next = append(next, list[i]+l)
+			}
+		}
+		list = next
+	}
+
+	f.words = list
 	return wordlist.New(f.words), nil
 }
 
 func TestSimulations(t *testing.T) {
 	args := &puzzler.Args{Hard: true, Guesses: 1}
-	for l := 1; l <= 3; l++ {
+	f := &fakeLoader{}
+	wordlist.Loader = f
+		
+	// Runtime is O((l^l)^2) -- so running simulations with wordlists >4
+	// takes... forever. Length 5 --> 9MM+ test cases, and I don't think we get
+	// any extra benefit from it.
+	for l := 2; l <= 4; l++ {
+		f.length = l
 		t.Run(fmt.Sprint(l), func(t *testing.T) {
-			f := &fakeLoader{length: l}
-			wordlist.Loader = f
-			f.Load()
-
+			if _, err := f.Load(); err != nil {
+				t.Fatal(err)
+			}
 			for _, solution := range f.words {
 				t.Run(solution, func(t *testing.T) {
+					args.Solution = solution
 					for _, guess := range f.words {
 						t.Run(guess, func(t *testing.T) {
-							args.Solution = solution
 							p, err := puzzler.New(args)
 							if err != nil {
 								t.Fatalf("Failed to make a Puzzler: %v", err)
@@ -64,6 +73,10 @@ func TestSimulations(t *testing.T) {
 							if p.Words() != s.Remaining() {
 								t.Errorf("%d Puzzler words != %d Solver words", p.Words(), s.Remaining())
 							}
+							if p.Words() == 0 {
+								t.Error("no words left.")
+							}
+							wordsBefore := p.Words()
 
 							response, err := p.Guess(guess)
 							if err != nil {
@@ -75,6 +88,12 @@ func TestSimulations(t *testing.T) {
 
 							if p.Words() != s.Remaining() {
 								t.Errorf("%d Puzzler words != %d Solver words\n", p.Words(), s.Remaining())
+							}
+							if p.Words() == 0 {
+								t.Error("no words left.")
+							}
+							if wordsBefore <= p.Words() {
+								t.Errorf("%d words before <= %d words after", wordsBefore, p.Words())
 							}
 						})
 					}
