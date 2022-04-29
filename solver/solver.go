@@ -55,7 +55,7 @@ func (s *Solver) React(guess, response string) error {
 	}
 
 	matches := 0
-	keepOnly := make([]string, 5) // letters in required positions
+	keepOnly := make([]string, len(guess)) // letters in required positions
 
 	// Need to process response signals in this order; see test case for
 	// combination of guess "carer" for word "foyer" in solver_test to
