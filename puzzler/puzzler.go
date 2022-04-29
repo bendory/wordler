@@ -136,6 +136,10 @@ func (w *Wordle) Guess(g string) (string, error) {
 			if !lettersFound[c] {
 				debug("deleting all words containing '%c'", c)
 				w.remaining.Delete(regexp.MustCompile(string(c)))
+			} else {
+				pattern := fmt.Sprintf("^%s%s", strings.Repeat(".", i), string(c))
+				debug("deleting all words with '%c' as char %d by using regexp '%v'", c, i+1, pattern)
+				w.remaining.Delete(regexp.MustCompile(pattern))
 			}
 			debug("%d words left.", w.remaining.Length())
 		}

@@ -386,18 +386,27 @@ func TestSimpleDoubles(t *testing.T) {
 	cases := []struct {
 		word, guess string
 		response    []byte
+		remaining   int
 	}{{
-		word:     "forty",
-		guess:    "worry",
-		response: []byte{wordler.NIL, wordler.CORRECT, wordler.CORRECT, wordler.NIL, wordler.CORRECT},
+		word:      "forty",
+		guess:     "worry",
+		response:  []byte{wordler.NIL, wordler.CORRECT, wordler.CORRECT, wordler.NIL, wordler.CORRECT},
+		remaining: 1,
 	}, {
-		word:     "forty",
-		guess:    "robot",
-		response: []byte{wordler.ELSEWHERE, wordler.CORRECT, wordler.NIL, wordler.NIL, wordler.ELSEWHERE},
+		word:      "forty",
+		guess:     "robot",
+		response:  []byte{wordler.ELSEWHERE, wordler.CORRECT, wordler.NIL, wordler.NIL, wordler.ELSEWHERE},
+		remaining: 1,
 	}, {
-		word:     "foyer",
-		guess:    "carer",
-		response: []byte{wordler.NIL, wordler.NIL, wordler.NIL, wordler.CORRECT, wordler.CORRECT},
+		word:      "foyer",
+		guess:     "carer",
+		response:  []byte{wordler.NIL, wordler.NIL, wordler.NIL, wordler.CORRECT, wordler.CORRECT},
+		remaining: 1,
+	}, {
+		word:      "ab",
+		guess:     "aa",
+		response:  []byte{wordler.CORRECT, wordler.NIL},
+		remaining: 1,
 	}}
 
 	for _, c := range cases {
@@ -417,7 +426,7 @@ func TestSimpleDoubles(t *testing.T) {
 			if want, got := string(c.response), response; want != got {
 				t.Errorf("want %v, got %v", want, got)
 			}
-			if want, got := 1, p.Words(); want != got {
+			if want, got := c.remaining, p.Words(); want != got {
 				t.Errorf("want %d words remaining, got %d", want, got)
 			}
 		})
