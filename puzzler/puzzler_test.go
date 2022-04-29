@@ -400,7 +400,6 @@ func TestSimpleDoubles(t *testing.T) {
 		response: []byte{wordler.NIL, wordler.NIL, wordler.NIL, wordler.CORRECT, wordler.CORRECT},
 	}}
 
-	verbose = true
 	for _, c := range cases {
 		t.Run(c.guess, func(t *testing.T) {
 			list := []string{c.word, c.guess}
