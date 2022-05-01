@@ -10,6 +10,15 @@ import (
 	"wordler/wordlist"
 )
 
+type Dictionary int
+
+const (
+	// WordleDictionary signals use of Wordle's dictionary.
+	WordleDictionary = 0
+	// LocalDictionary signals use of the platform's local dictionary.
+	LocalDictionary = 1
+)
+
 // Wordle is a Wordle puzzle.
 type Wordle struct {
 	dict             *wordlist.WordList // full dictionary
@@ -21,7 +30,8 @@ type Wordle struct {
 
 // Args are used to construct a new Wordle puzzle.
 type Args struct {
-	Hard                bool // hard rules
+	Dictionary          Dictionary // dictionary to use; either Wordle or Local
+	Hard                bool       // hard rules
 	WordLength, Guesses int
 	Solution            string // create a puzzler with this solution; otherwise a random word is chosen
 	Options             []wordlist.Option
@@ -45,19 +55,37 @@ func New(a *Args) (*Wordle, error) {
 			Guesses:    wordler.DEFAULT_GUESSES,
 		}
 	}
-	a.Options = append(a.Options, wordlist.KeepOnlyOption{Exp: regexp.MustCompile(fmt.Sprintf("^[a-z]{%d}$", a.WordLength))})
 
-	var err error
 	w := &Wordle{remainingGuesses: a.Guesses, hard: a.Hard}
-	if w.dict, err = wordlist.NewDictionary(a.Options...); err != nil {
-		return nil, err
+	var err error
+	switch a.Dictionary {
+	case WordleDictionary:
+		switch a.WordLength {
+		case wordler.DEFAULT_WORD_LENGTH, 0:
+			// Allowed
+		default:
+			return nil, fmt.Errorf("invalid args: cannot specify word length != %d when using Wordle dictionary", wordler.DEFAULT_WORD_LENGTH)
+		}
+		w.dict = wordlist.New(wordler.Dictionary, a.Options...)
+		w.remaining = wordlist.New(wordler.Dictionary, a.Options...)
+
+	case LocalDictionary:
+		a.Options = append(a.Options, wordlist.KeepOnlyOption{Exp: regexp.MustCompile(fmt.Sprintf("^[a-z]{%d}$", a.WordLength))})
+
+		if w.dict, err = wordlist.NewDictionary(a.Options...); err != nil {
+			return nil, err
+		}
+		if w.remaining, err = wordlist.NewDictionary(a.Options...); err != nil {
+			return nil, err
+		}
+		if w.Words() == 0 {
+			return nil, NoWordsRemainingErr
+		}
+
+	default:
+		return nil, errors.New("invalid dictionary option")
 	}
-	if w.remaining, err = wordlist.NewDictionary(a.Options...); err != nil {
-		return nil, err
-	}
-	if w.Words() == 0 {
-		return nil, NoWordsRemainingErr
-	}
+
 	if a.Solution != "" {
 		if err := w.validate(a.Solution); err == nil {
 			w.word = a.Solution

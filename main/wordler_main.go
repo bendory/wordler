@@ -23,6 +23,7 @@ var verbosity int = -1
 func main() {
 	args := &puzzler.Args{}
 	flag.BoolVar(&args.Hard, "hard", true, "use hard rules: 'Any revealed hints must be used in subsequent guesses'")
+	local := flag.Bool("local_dictionary", false, "use local dictionary in place of Wordle dictionary")
 	flag.IntVar(&args.WordLength, "length", wordler.DEFAULT_WORD_LENGTH, "word length")
 	flag.IntVar(&args.Guesses, "guesses", wordler.DEFAULT_GUESSES, "number of guesses allowed")
 	flag.StringVar(&args.Solution, "solution", "", "puzzler will use the specified solution")
@@ -37,7 +38,10 @@ func main() {
 	clGuesses := flag.Args()
 
 	fmt.Println("I'm a wordler! I try to solve wordle puzzles and report on my success.")
-	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", args.WordLength)
+	if *local {
+		fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", args.WordLength)
+		args.Dictionary = puzzler.LocalDictionary
+	}
 	fmt.Printf("I allow %d guesses for each of %d iterations.\n", args.Guesses, *iterations)
 	if args.Solution != "" {
 		fmt.Printf("I'll always use '%v' as my solution.\n", args.Solution)
@@ -66,12 +70,17 @@ func main() {
 			fmt.Printf("Failed to make a Puzzler: %v\n", err)
 			continue
 		}
-		s, err := solver.New(option)
-		if err != nil {
-			// This should never happen.
-			count.solverFailures++
-			fmt.Printf("Failed to make a Solver: %v\n", err)
-			continue
+
+		var s *solver.Solver
+		if *local {
+			if s, err = solver.New(option); err != nil {
+				// This should never happen.
+				count.solverFailures++
+				fmt.Printf("Failed to make a Solver: %v\n", err)
+				continue
+			}
+		} else {
+			s = solver.From(wordler.Dictionary)
 		}
 
 		var guess, response string

@@ -46,7 +46,7 @@ func (f *fakeLoader) Load(_ ...wordlist.Option) (*wordlist.WordList, error) {
 }
 
 func TestSimulations(t *testing.T) {
-	args := &puzzler.Args{Hard: true, Guesses: 1}
+	args := &puzzler.Args{Hard: true, Guesses: 1, Dictionary: puzzler.LocalDictionary}
 
 	was := wordlist.Loader
 	f := &fakeLoader{}

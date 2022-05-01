@@ -17,7 +17,15 @@ type Solver struct {
 	w    *wordlist.WordList
 }
 
-// New returns a new Solver populated with a Dictionary.
+// From returns a new Solver created from the given list of words.
+func From(dictionary []string) *Solver {
+	return &Solver{
+		have: make(map[byte]bool),
+		w:    wordlist.New(dictionary),
+	}
+}
+
+// New returns a new Solver populated with the local Dictionary.
 func New(options ...wordlist.Option) (*Solver, error) {
 	var (
 		g   *Solver

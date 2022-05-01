@@ -16,14 +16,18 @@ func main() {
 	flag.IntVar(&args.WordLength, "length", wordler.DEFAULT_WORD_LENGTH, "word length")
 	flag.IntVar(&args.Guesses, "guesses", wordler.DEFAULT_GUESSES, "number of guesses allowed")
 	flag.StringVar(&args.Solution, "solution", "", "puzzler will use the specified solution")
+	localDictionary := flag.Bool("local_dictionary", false, "load local dictionary in place of Wordle dictionary")
 	flag.Parse()
 
 	fmt.Println("I'm a wordle puzzle! You make guesses, I'll score them.")
-	fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", args.WordLength)
+	if *localDictionary {
+		args.Dictionary = puzzler.LocalDictionary
+		fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", args.WordLength)
+	}
 	fmt.Printf("I'll use '%c' for \"right letter in the right place\"\n", wordler.CORRECT)
 	fmt.Printf("I'll use '%c' for \"right letter in the wrong place\"\n", wordler.ELSEWHERE)
 	fmt.Printf("I'll use '%c' for \"letter not in the word\"\n", wordler.NIL)
-	fmt.Println("I'll respond with the letter 'n' by itself if your guess isn't in wordle's dictionary.")
+	fmt.Println("I'll respond with the letter 'n' by itself if your guess isn't in thedictionary.")
 	fmt.Printf("You've got %d guesses.\n", args.Guesses)
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()

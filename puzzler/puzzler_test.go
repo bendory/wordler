@@ -25,9 +25,9 @@ func TestNew(t *testing.T) {
 	f := &fakeLoader{words: list}
 	wordlist.Loader = f
 
-	p, err := New(&Args{Hard: true, WordLength: 3})
+	p, err := New(&Args{Hard: true, Dictionary: LocalDictionary, WordLength: 3})
 	if err != nil {
-		t.Errorf("error: %v", err)
+		t.Fatalf("error: %v", err)
 	}
 	if want, got := len(list), p.dict.Length(); want != got {
 		t.Errorf("want %#v; got %#v", list, p.dict)
@@ -40,13 +40,12 @@ func TestNew(t *testing.T) {
 	}
 
 	f.err = errors.New("some error")
-	p, err = New(nil)
-	if err == nil {
+	if p, err = New(&Args{Dictionary: LocalDictionary}); err == nil {
 		t.Error("want error, got nil")
 	}
 
 	f.err = nil
-	p, err = New(&Args{WordLength: 0})
+	p, err = New(&Args{WordLength: 0, Dictionary: LocalDictionary})
 	if want, got := NoWordsRemainingErr, err; want != got {
 		t.Errorf("want %v, got %v", want, got)
 	}
@@ -307,7 +306,7 @@ func TestSolution(t *testing.T) {
 	f := &fakeLoader{words: list}
 	wordlist.Loader = f
 
-	args := &Args{Solution: list[0], WordLength: 3}
+	args := &Args{Solution: list[0], WordLength: 3, Dictionary: LocalDictionary}
 	if _, err := New(args); err != nil {
 		t.Errorf("error: %v", err)
 	}

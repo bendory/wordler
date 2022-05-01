@@ -44,7 +44,7 @@ func TestNew(t *testing.T) {
 
 func TestGuess(t *testing.T) {
 	testList := []string{"foo", "bar", "bam", "zap", "zbz"}
-	guesser := &Solver{w: wordlist.New(testList)}
+	guesser := From(testList)
 	guess := guesser.Guess()
 
 	if !guesser.w.Contains(guess) {
@@ -98,7 +98,7 @@ func TestReact(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.guess, func(t *testing.T) {
-			guesser := &Solver{w: wordlist.New(testList)}
+			guesser := From(testList)
 			if err := guesser.React(c.guess, c.response); err != nil {
 				t.Errorf("got error %v", err)
 			}
