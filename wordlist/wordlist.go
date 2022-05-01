@@ -148,11 +148,17 @@ func (w *WordList) OptimalGuess() string {
 	if w == nil {
 		return ""
 	}
-	// count letter frequencies
+	// count letter frequencies; note that we count how many words each letter
+	// appears in, not how many times each letter shows up. Thus "forgo"
+	// increments "o" by 1, not 2.
 	counts := make(map[int32]int)
 	for word, _ := range w.words {
+		seen := make(map[int32]bool)
 		for _, c := range word {
-			counts[c] = counts[c] + 1
+			if !seen[c] {
+				counts[c] = counts[c] + 1
+				seen[c] = true
+			}
 		}
 	}
 
@@ -161,6 +167,13 @@ func (w *WordList) OptimalGuess() string {
 		heaviest         string
 		max, mostDiverse int
 	)
+
+	// TODO: optimize further!
+	// Given remaining words {forgo, forum, fordo}, the optimzal guesses are
+	// forgo and fordo -- because scoring those results in at most 1 additional
+	// guess. But this algorithm chooses forum -- because it has 5 different
+	// letters. We could be smarter and ignore the "for" prefix, which would
+	// then result in choosing forgo or fordo.
 	for word, _ := range w.words {
 		weight := 0
 		uniq := make(map[int32]bool)

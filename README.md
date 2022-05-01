@@ -54,6 +54,10 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
 	  weighted-average letter frequency:
 		* 87.0% success rate
 		* Average guesses to win: 4.36 guesses
+	* Weight letters based on how many words they appear in instead of total
+	  number of times they appear (which is above "letter frequency"):
+		* 87.9% success rate
+		* Average guesses to win: 4.36 guesses
 
 ## TODO
 * [x] make wordle puzzle, give feedback on guesses
