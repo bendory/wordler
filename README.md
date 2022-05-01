@@ -32,19 +32,28 @@ use them for solving with a reciprocal approach.
 ## Statistics
 All stats are based on 1000 6-guess iterations on 5-letter wordles.
 
-* Random guesses:
-	* 91.5% success rate
-	* Average guesses to win: 4.55 guesses
-* Optimize guess based *only* on heaviest weighted-averge letter frequency:
-	* 79.0% success rate
-	* Average guesses to win: 4.91 guesses
-	* This is *worse than random* because words with repeated common letters
-	  become optimal -- the first guess is always 'arara', which only includes 2
-	  letters! (The second guess was often 'neese' which is also awful.)
-* Optimize based on most-new-letters-in-guess followed by heaviest
-  weighted-average letter frequency:
-	* 96.0% success rate
-	* Average guesses to win: 4.21 guesses
+* Using `/usr/share/dict`:
+	* Random guesses:
+		* 91.5% success rate
+		* Average guesses to win: 4.55 guesses
+	* Optimize guess based *only* on heaviest weighted-averge letter frequency:
+		* 79.0% success rate
+		* Average guesses to win: 4.91 guesses
+		* This is *worse than random* because words with repeated common letters
+		  become optimal -- the first guess is always 'arara', which only includes 2
+		  letters! (The second guess was often 'neese' which is also awful.)
+	* Optimize based on most-new-letters-in-guess followed by heaviest
+	  weighted-average letter frequency:
+		* 96.0% success rate
+		* Average guesses to win: 4.21 guesses
+* Using Wordler dictionary:
+	* Random guesses:
+		* 84.3% success rate
+		* Average guesses to win: 4.58
+	* Optimize based on most-new-letters-in-guess followed by heaviest
+	  weighted-average letter frequency:
+		* 87.0% success rate
+		* Average guesses to win: 4.36 guesses
 
 ## TODO
 * [x] make wordle puzzle, give feedback on guesses
@@ -59,7 +68,7 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
 * [x] connect puzzler to solver
     * [x] gather statistics on iterations
 	* [ ] There's a resource leak somewhere in `wordler/main` such that it slows
-	  as it iterates. Find and fix that!
+	  as it iterates when running with local dictionary. Find and fix that!
 * [ ] problems: `/usr/share/dict` on Mac does not include...
     * [ ] plurals
 	* [ ] fewer
