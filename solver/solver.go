@@ -43,7 +43,7 @@ func New(options ...wordlist.Option) (*Solver, error) {
 	return g, err
 }
 
-// Guess provides a random guess from remaining words
+// Guess provides a guess from remaining words
 func (s *Solver) Guess() string {
 	return s.w.OptimalGuess()
 }
