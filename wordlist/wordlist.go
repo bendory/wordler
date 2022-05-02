@@ -148,9 +148,8 @@ func (w *WordList) OptimalGuess() string {
 	if w == nil {
 		return ""
 	}
-	// count letter frequencies; note that we count how many words each letter
-	// appears in, not how many times each letter shows up. Thus "forgo"
-	// increments "o" by 1, not 2.
+	// Count how many words each letter appears in (as opposed to how many times
+	// each letter shows up). Thus "forgo" increments "o" by 1, not 2.
 	counts := make(map[int32]int)
 	for word, _ := range w.words {
 		seen := make(map[int32]bool)
