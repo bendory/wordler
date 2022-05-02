@@ -78,14 +78,14 @@ func New(a *Args) (*Wordle, error) {
 		if w.remaining, err = wordlist.NewDictionary(a.Options...); err != nil {
 			return nil, err
 		}
-		if w.Words() == 0 {
-			return nil, NoWordsRemainingErr
-		}
 
 	default:
 		return nil, errors.New("invalid dictionary option")
 	}
 
+	if w.Words() == 0 {
+		return nil, NoWordsRemainingErr
+	}
 	if a.Solution != "" {
 		if err := w.validate(a.Solution); err == nil {
 			w.word = a.Solution
