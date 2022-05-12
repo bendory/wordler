@@ -32,6 +32,7 @@ func main() {
 	fmt.Printf("Use '%c' for \"right letter in the wrong place\"\n", wordler.ELSEWHERE)
 	fmt.Printf("Use '%c' for \"letter not in the word\"\n", wordler.NIL)
 	fmt.Println("Respond with the letter 'n' by itself to tell me that my guess isn't in wordle's dictionary.")
+	fmt.Println("Respond with the letter 'y' by itself to tell me that I've solved the wordle.")
 	fmt.Println("Ready? Here we go!")
 	fmt.Println()
 
