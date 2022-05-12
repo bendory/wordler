@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"wordler"
 	"wordler/solver"
@@ -74,10 +75,17 @@ func main() {
 				fmt.Print("Response? ")
 				fmt.Scan(&response)
 
-				if response == "n" {
+				switch response {
+				case "n":
 					s.NotInWordle(guess)
 					done = true
-				} else if err := s.React(guess, response); err != nil {
+					continue
+
+				case "y": // syntactic sugar for all-correct response
+					response = strings.Repeat(string(wordler.CORRECT), *length)
+				}
+
+				if err := s.React(guess, response); err != nil {
 					fmt.Println("ERROR: ", err)
 					fmt.Printf("Guess was \"%v\"\n", guess)
 				} else {
