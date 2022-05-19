@@ -60,17 +60,16 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
 		* Average guesses to win: 4.36 guesses
 
 ## TODO
-* [ ] Optimize further! `egrep ^.ater$ /usr/share/dict/words` reveals a
+* [ ] Optimizations.
+    * [ ] `egrep ^.ater$ /usr/share/dict/words` reveals a
       pathological case where `bater` can take 8 guesses. Optimized solver
       should seek to avoid these pathological cases by avoiding guesses that
       use a pattern of letters repeated in other words. Another test case:
       `baker` is solved ~34% of the time with the current algorithm due to
       all the `^.aker$` words.
       NOTE: this TODO is based on `dict`, not the wordle dictionary.
+    * [ ] Running iterator with `--iterations=1000 --solution=glass` only wins
+	  48.1% of games played.
 * [ ] Fix resource leak in the platform dictionary loader -- iterator slows 
       as it iterates when running with platform dictionary.
-* [ ] problems: `/usr/share/dict` on Mac does not include...
-    * [ ] plurals
-	* [ ] fewer
-	* [ ] heist
 * [ ] load dictionary cross-platform
