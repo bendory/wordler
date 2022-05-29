@@ -70,6 +70,14 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
       NOTE: this TODO is based on `dict`, not the wordle dictionary.
     * [ ] Running iterator with `--iterations=1000 --solution=glass` only wins
 	  48.1% of games played.
+* [ ] Easier `Hard Mode`. It turns out that my `Hard Mode` is significantly
+      harder than Wordler's, and following theirs allows additional optimizations.
+      For example, if guess `arose` results in `a` and `o` identified as in
+      the puzzle but in the wrong place, Wordler alows guess `atoms` to follow.
+      I don't. The optimization would be for solver to maintain a list of
+      possible solutions (my `Hard Mode`) separate from a list of permissible
+      guesses (Wordler's `Hard Mode`) and then identify the optimal guess based
+      on the possible solution set.
 * [ ] Fix resource leak in the platform dictionary loader -- iterator slows 
       as it iterates when running with platform dictionary.
 * [ ] load dictionary cross-platform
