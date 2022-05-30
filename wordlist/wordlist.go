@@ -63,7 +63,7 @@ func (p *platformLoader) Load(options ...Option) (*WordList, error) {
 
 // New creates a new WordList containing the words in s.
 func New(s []string, options ...Option) *WordList {
-	m := make(map[string]bool)
+	m := make(map[string]bool, len(s))
 	for _, word := range s {
 		m[word] = true
 	}
@@ -150,9 +150,9 @@ func (w *WordList) OptimalGuess() string {
 	}
 	// Count how many words each letter appears in (as opposed to how many times
 	// each letter shows up). Thus "forgo" increments "o" by 1, not 2.
-	counts := make(map[int32]int)
+	counts := make(map[int32]int, 26)
 	for word, _ := range w.words {
-		seen := make(map[int32]bool)
+		seen := make(map[int32]bool, 26)
 		for _, c := range word {
 			if !seen[c] {
 				counts[c] = counts[c] + 1
