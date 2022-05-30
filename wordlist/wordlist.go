@@ -17,7 +17,7 @@ type WordList struct {
 // provide a platform-independent substitution.
 var Loader DictionaryLoader = &platformLoader{}
 
-// NewDictionary returns a *WordList containing /usr/share/dict/words.
+// NewDictionary returns a *WordList based on the dictionary returned by Loader.
 func NewDictionary(options ...Option) (*WordList, error) {
 	return Loader.Load(options...)
 }
