@@ -78,6 +78,10 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
       possible solutions (my `Hard Mode`) separate from a list of permissible
       guesses (Wordler's `Hard Mode`) and then identify the optimal guess based
       on the possible solution set.
+	  `Hard Mode` requires merely that:
+	  1. Letters known to be in the right place must stay there.
+	  2. Letters known to be in the puzzle must be included in your guess, but
+	     may continue to be in the place known to be incorrect.
 * [ ] Fix resource leak in the platform dictionary loader -- iterator slows 
       as it iterates when running with platform dictionary.
 * [ ] load dictionary cross-platform
