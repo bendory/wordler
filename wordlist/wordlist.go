@@ -89,6 +89,15 @@ func (this *WordList) Equals(that *WordList) bool {
 	return reflect.DeepEqual(this.words, that.words)
 }
 
+// Clone the wordlist.
+func (w *WordList) Clone() *WordList {
+	m := make(map[string]bool, len(w.words))
+	for word := range w.words {
+		m[word] = true
+	}
+	return &WordList{m}
+}
+
 // Length returns the number of words in the list.
 func (w *WordList) Length() int {
 	if w == nil {
@@ -139,19 +148,21 @@ func (w *WordList) Random() string {
 	return ""
 }
 
-// OptimalGuess returns the best guess from this WordList.
+// OptimalGuessFrom returns the best guess for this solutions WordList based on
+// the available guesses in the guesses WordList.
 // The best guess:
-// - uses the most common letters based on letter frequency of words in the list
-// - returns a word with the highest count of new letters that has the heaviest
+// - uses the most common letters based on letter frequency of words in this
+//   list
+// - returns a guess with the highest count of new letters that has the heaviest
 //   weighted-average letter frequency
-func (w *WordList) OptimalGuess() string {
-	if w == nil {
+func (solutions *WordList) OptimalGuessFrom(guesses *WordList) string {
+	if solutions.Length() == 0 || guesses.Length() == 0 {
 		return ""
 	}
 	// Count how many words each letter appears in (as opposed to how many times
 	// each letter shows up). Thus "forgo" increments "o" by 1, not 2.
 	counts := make(map[int32]int, 26)
-	for word, _ := range w.words {
+	for word, _ := range solutions.words {
 		seen := make(map[int32]bool, 26)
 		for _, c := range word {
 			if !seen[c] {
@@ -170,10 +181,10 @@ func (w *WordList) OptimalGuess() string {
 	// TODO: optimize further!
 	// Given remaining words {forgo, forum, fordo}, the optimzal guesses are
 	// forgo and fordo -- because scoring those results in at most 1 additional
-	// guess. But this algorithm chooses forum -- because it has 5 different
+	// guess. But this algorithm chooses "forum" -- because it has 5 different
 	// letters. We could be smarter and ignore the "for" prefix, which would
 	// then result in choosing forgo or fordo.
-	for word, _ := range w.words {
+	for word, _ := range guesses.words {
 		weight := 0
 		uniq := make(map[int32]bool)
 		for _, c := range word {
@@ -191,9 +202,17 @@ func (w *WordList) OptimalGuess() string {
 		case weight > max: // diversity == mostDiverse
 			heaviest = word
 			max = weight
+		case weight == max && solutions.Contains(word) && !solutions.Contains(heaviest):
+			heaviest = word
 		}
 	}
 	return heaviest
+}
+
+// OptimalGuess calls OptimalGuessFrom with this WordList as both the guess
+// list and solution set.
+func (w *WordList) OptimalGuess() string {
+	return w.OptimalGuessFrom(w)
 }
 
 // Option represents a constraint to place on a WordList.

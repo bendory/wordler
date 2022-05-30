@@ -58,6 +58,10 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
 	  number of times they appear (which is above "letter frequency"):
 		* 87.9% success rate
 		* Average guesses to win: 4.36 guesses
+	* Use weighting, but use wordler's `hard mode`, which is actually easier
+	  than my initial implementation.
+	    * 89.0% success rate
+		* Average guesses to win: 4.34 guesses
 
 ## TODO
 * [ ] Optimizations.
@@ -70,7 +74,7 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
       NOTE: this TODO is based on `dict`, not the wordle dictionary.
     * [ ] Running iterator with `--iterations=1000 --solution=glass` only wins
 	  48.1% of games played.
-* [ ] Easier `Hard Mode`. It turns out that my `Hard Mode` is significantly
+* [x] Easier `Hard Mode`. It turns out that my `Hard Mode` is significantly
       harder than Wordler's, and following theirs allows additional optimizations.
       For example, if guess `arose` results in `a` and `o` identified as in
       the puzzle but in the wrong place, Wordler alows guess `atoms` to follow.
