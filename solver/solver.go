@@ -27,7 +27,7 @@ func From(dictionary []string) *Solver {
 	}
 }
 
-// New returns a new Solver populated with the local Dictionary.
+// New returns a new Solver populated with the default Dictionary.
 func New(options ...wordlist.Option) (*Solver, error) {
 	var (
 		s   *Solver
