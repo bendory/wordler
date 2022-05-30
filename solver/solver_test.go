@@ -47,25 +47,30 @@ func TestGuess(t *testing.T) {
 	guesser := From(testList)
 	guess := guesser.Guess()
 
-	// FIXME: test s.g as well
 	if !guesser.s.Contains(guess) {
-		t.Errorf("Guess %v not found in wordlist %#v", guess, guesser.s)
+		t.Errorf("Guess %v not found in solution list %#v", guess, guesser.s)
 	}
-	// FIXME: test s.g as well
+	if !guesser.g.Contains(guess) {
+		t.Errorf("Guess %v not found in guess list %#v", guess, guesser.g)
+	}
+
 	if guesser.s.Contains("bogus") {
-		t.Errorf("How did \"bogus\" get in wordlist %#v", guesser.s)
+		t.Errorf("How did \"bogus\" get in solution list %#v", guesser.s)
+	}
+	if guesser.g.Contains("bogus") {
+		t.Errorf("How did \"bogus\" get in guess list %#v", guesser.g)
 	}
 
 	singleton := "foo"
-	// FIXME: update s.g as well
 	guesser.s = wordlist.New([]string{singleton})
+	guesser.g = wordlist.New([]string{singleton})
 	guess = guesser.Guess()
 	if guess != singleton {
 		t.Errorf("Want guess %v, got %v", singleton, guess)
 	}
 
-	// FIXME: update s.g as well
 	guesser.s = nil
+	guesser.g = nil
 	guess = guesser.Guess()
 	if guess != "" {
 		t.Errorf("Want empty string, got %v", guess)
@@ -75,30 +80,44 @@ func TestGuess(t *testing.T) {
 func TestReact(t *testing.T) {
 	testList := []string{"foo", "bar", "bam", "zap", "zbz"}
 	cases := []struct {
-		guess, response string
-		remaining       *wordlist.WordList
-	}{
-		{"bar", string([]byte{wordler.CORRECT, wordler.CORRECT, wordler.CORRECT}), wordlist.New([]string{"bar"})},
-		{"###", string([]byte{wordler.NIL, wordler.NIL, wordler.NIL}), wordlist.New(testList)},
-		{"abc", string([]byte{wordler.NIL, wordler.NIL, wordler.NIL}), wordlist.New([]string{"foo"})},
-		{
-			"b##",
-			string([]byte{wordler.ELSEWHERE, wordler.NIL, wordler.NIL}),
-			wordlist.New([]string{"zbz"}),
-		}, {
-			"#oz",
-			string([]byte{wordler.NIL, wordler.NIL, wordler.ELSEWHERE}),
-			wordlist.New([]string{"zap"}),
-		}, {
-			"zfo",
-			string([]byte{wordler.NIL, wordler.ELSEWHERE, wordler.CORRECT}),
-			wordlist.New([]string{"foo"}),
-		}, {
-			"b#r",
-			string([]byte{wordler.CORRECT, wordler.NIL, wordler.CORRECT}),
-			wordlist.New([]string{"bar"}),
-		},
-	}
+		guess, response    string
+		solutions, guesses *wordlist.WordList // valid solutions and guesses
+	}{{
+		guess:     "bar",
+		response:  string([]byte{wordler.CORRECT, wordler.CORRECT, wordler.CORRECT}),
+		solutions: wordlist.New([]string{"bar"}),
+		guesses:   wordlist.New([]string{"bar"}),
+	}, {
+		guess:     "###",
+		response:  string([]byte{wordler.NIL, wordler.NIL, wordler.NIL}),
+		solutions: wordlist.New(testList),
+		guesses:   wordlist.New(testList),
+	}, {
+		guess:     "abc",
+		response:  string([]byte{wordler.NIL, wordler.NIL, wordler.NIL}),
+		solutions: wordlist.New([]string{"foo"}),
+		guesses:   wordlist.New(testList),
+	}, {
+		guess:     "b##",
+		response:  string([]byte{wordler.ELSEWHERE, wordler.NIL, wordler.NIL}),
+		solutions: wordlist.New([]string{"zbz"}),
+		guesses:   wordlist.New([]string{"bar", "bam", "zbz"}),
+	}, {
+		guess:     "#oz",
+		response:  string([]byte{wordler.NIL, wordler.NIL, wordler.ELSEWHERE}),
+		solutions: wordlist.New([]string{"zap"}),
+		guesses:   wordlist.New([]string{"zap", "zbz"}),
+	}, {
+		guess:     "zfo",
+		response:  string([]byte{wordler.NIL, wordler.ELSEWHERE, wordler.CORRECT}),
+		solutions: wordlist.New([]string{"foo"}),
+		guesses:   wordlist.New([]string{"foo"}),
+	}, {
+		guess:     "b#r",
+		response:  string([]byte{wordler.CORRECT, wordler.NIL, wordler.CORRECT}),
+		solutions: wordlist.New([]string{"bar"}),
+		guesses:   wordlist.New([]string{"bar"}),
+	}}
 
 	for _, c := range cases {
 		t.Run(c.guess, func(t *testing.T) {
@@ -106,8 +125,10 @@ func TestReact(t *testing.T) {
 			if err := guesser.React(c.guess, c.response); err != nil {
 				t.Errorf("got error %v", err)
 			}
-			// FIXME: test s.g as well
-			if want, got := c.remaining, guesser.s; !want.Equals(got) {
+			if want, got := c.solutions, guesser.s; !want.Equals(got) {
+				t.Errorf("want %#v != got %#v", want, got)
+			}
+			if want, got := c.guesses, guesser.g; !want.Equals(got) {
 				t.Errorf("want %#v != got %#v", want, got)
 			}
 		})
@@ -126,21 +147,28 @@ func TestReact(t *testing.T) {
 }
 
 func TestRemaining(t *testing.T) {
-	// FIXME: set and test s.g as well
-	s := &Solver{s: wordlist.New([]string{"f"})}
+	s := &Solver{
+		s: wordlist.New([]string{"f"}),
+		g: wordlist.New([]string{"f", "g", "h"}),
+	}
 	if want, got := 1, s.Remaining(); want != got {
 		t.Errorf("want %d, got %d", want, got)
 	}
-	// FIXME: set and test s.g as well
+
 	s.s = wordlist.New([]string{})
 	if want, got := 0, s.Remaining(); want != got {
 		t.Errorf("want %d, got %d", want, got)
 	}
-	// FIXME: set and test s.g as well
+
 	s.s = nil
 	if want, got := 0, s.Remaining(); want != got {
 		t.Errorf("want %d, got %d", want, got)
 	}
+
+	if want, got := 3, s.g.Length(); want != got {
+		t.Errorf("want %d, got %d", want, got)
+	}
+
 	s = nil
 	if want, got := 0, s.Remaining(); want != got {
 		t.Errorf("want %d, got %d", want, got)
@@ -184,7 +212,6 @@ func TestDoubleLetters(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.guess, func(t *testing.T) {
-			// FIXME: set and test s.g as well
 			s := &Solver{s: wordlist.New([]string{c.word})}
 			response := string(c.response)
 			if err := s.React(c.guess, response); err != nil {
@@ -194,49 +221,61 @@ func TestDoubleLetters(t *testing.T) {
 				t.Errorf("want 1, got %d", s.Remaining())
 			}
 			want := wordlist.New([]string{c.word})
-			// FIXME: test s.g as well
 			if !want.Equals(s.s) {
 				t.Errorf("want %#v; got %#v", want, s.s)
 			}
 		})
 	}
+}
 
-	// Guess case should be eliminated.
+func TestEliminateGuess(t *testing.T) {
+	w := wordlist.New([]string{"array", "foray", "stray", "spray"})
 	s := &Solver{
-		// FIXME: set and test s.g as well
-		s: wordlist.New([]string{"array", "foray"}),
-		have: map[byte]bool{
-			'r': true,
-			'a': true,
-			'y': true,
-		},
+		s: w.Clone(),
+		g: w.Clone(),
 	}
 	response := string([]byte{wordler.NIL, wordler.NIL, wordler.CORRECT, wordler.CORRECT, wordler.CORRECT})
+
+	if err := s.React("stray", response); err != nil {
+		t.Errorf("Error: %v", err)
+	}
+	if got, want := s.s, wordlist.New([]string{"array", "foray"}); !got.Equals(want) {
+		t.Errorf("solutions: want %#v; got %#v", want, s.s)
+	}
+	if got, want := s.g, wordlist.New([]string{"array", "foray", "spray"}); !got.Equals(want) {
+		t.Errorf("guesses: want %#v; got %#v", want, s.g)
+	}
+
 	if err := s.React("array", response); err != nil {
 		t.Errorf("Error: %v", err)
 	}
-	want := wordlist.New([]string{"foray"})
-	// FIXME: test s.g as well
-	if !want.Equals(s.s) {
-		t.Errorf("want %#v; got %#v", want, s.s)
+	if got, want := s.s, wordlist.New([]string{"foray"}); !got.Equals(want) {
+		t.Errorf("solutions: want %#v; got %#v", want, s.s)
+	}
+	if got, want := s.g, wordlist.New([]string{"foray", "spray"}); !got.Equals(want) {
+		t.Errorf("guesses: want %#v; got %#v", want, s.g)
 	}
 }
 
 func TestNotInWordle(t *testing.T) {
-	// FIXME: set and test s.g as well
-	s := &Solver{s: wordlist.New([]string{"a", "b", "c"})}
+	l := []string{"a", "b", "c"}
+	s := &Solver{s: wordlist.New(l), g: wordlist.New(l)}
 
 	s.NotInWordle("b")
 	want := wordlist.New([]string{"a", "c"})
 
-	// FIXME: test s.g as well
 	if !want.Equals(s.s) {
-		t.Errorf("want %#v; got %#v", want, s.s)
+		t.Errorf("solutions: want %#v; got %#v", want, s.s)
+	}
+	if !want.Equals(s.g) {
+		t.Errorf("guesses: want %#v; got %#v", want, s.g)
 	}
 
-	// FIXME: set and test s.g as well
 	s.NotInWordle("ac")
 	if !want.Equals(s.s) {
-		t.Errorf("want %#v; got %#v", want, s.s)
+		t.Errorf("solutions: want %#v; got %#v", want, s.s)
+	}
+	if !want.Equals(s.g) {
+		t.Errorf("guesses: want %#v; got %#v", want, s.g)
 	}
 }

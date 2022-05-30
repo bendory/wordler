@@ -78,20 +78,26 @@ func (s *Solver) React(guess, response string) error {
 			switch r {
 			case wordler.CORRECT:
 				matches++
+				// s.s will be filtered by keepOnly at end of loop.
+				// s.g is filtered here because keepOnly is more strict than
+				// hard mode.
 				keepOnly[i] = string(c)
 				s.have[c] = true
+				s.g.KeepOnly(regexp.MustCompile("^" + strings.Repeat(".", i) + string(c)))
 
 			case wordler.ELSEWHERE:
+				// s.s will be filtered by keepOnly at end of loop; s.g won't.
 				keepOnly[i] = "[^" + string(c) + "]"
-				s.s.KeepOnly(regexp.MustCompile(string(c)))
-				// FIXME: update s.g as well
+				r := regexp.MustCompile(string(c))
+				s.s.KeepOnly(r) // solution must contain c
+				s.g.KeepOnly(r) // future guesses must contain c
 				s.have[c] = true
 
 			case wordler.NIL:
 				keepOnly[i] = "[^" + string(c) + "]"
 				if !s.have[c] {
 					s.s.Delete(regexp.MustCompile(string(c)))
-					// FIXME: update s.g as well
+					// No update to s.g -- can still use this letter in guesses.
 				}
 			}
 		}
@@ -101,12 +107,13 @@ func (s *Solver) React(guess, response string) error {
 	if matches == len(guess) {
 		// complete match!
 		s.s = wordlist.New([]string{guess})
-		// FIXME: update s.g as well
+		s.g = s.s.Clone()
 	} else {
 		p := "^" + strings.Join(keepOnly, "") + "$"
 		debug("keepOnly: '%v'", p)
 		s.s.KeepOnly(regexp.MustCompile(p))
-		// FIXME: update s.g as well
+		// always eliminate guess itself
+		s.g.Delete(regexp.MustCompile(guess))
 	}
 	return nil
 }
@@ -125,8 +132,9 @@ func (s *Solver) NotInWordle(not string) {
 	if s == nil || s.s == nil {
 		return
 	}
-	s.s.Delete(regexp.MustCompile("^" + not + "$"))
-	// FIXME: update s.g as well
+	r := regexp.MustCompile("^" + not + "$")
+	s.s.Delete(r)
+	s.g.Delete(r)
 }
 
 // debug prints debug logs
