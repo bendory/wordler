@@ -89,6 +89,15 @@ func (this *WordList) Equals(that *WordList) bool {
 	return reflect.DeepEqual(this.words, that.words)
 }
 
+// Clone the wordlist.
+func (w *WordList) Clone() *WordList {
+	m := make(map[string]bool, len(w.words))
+	for word := range w.words {
+		m[word] = true
+	}
+	return &WordList{m}
+}
+
 // Length returns the number of words in the list.
 func (w *WordList) Length() int {
 	if w == nil {
