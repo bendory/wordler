@@ -234,7 +234,6 @@ func TestOptimalGuess(t *testing.T) {
 		list []string
 		want string
 	}{
-		{[]string{"a", "a", "b"}, "a"},
 		{[]string{"ab", "bb", "bc", "cc", "da", "dc"}, "bc"},
 		{[]string{"aaa", "bcd"}, "bcd"},        // Choose diversity.
 		{[]string{"bcd", "aaa"}, "bcd"},        // Choose diversity.
@@ -247,6 +246,31 @@ func TestOptimalGuess(t *testing.T) {
 		t.Run(c.want, func(t *testing.T) {
 			w := New(c.list)
 			if want, got := c.want, w.OptimalGuess(); want != got {
+				t.Errorf("want %v; got %v", want, got)
+			}
+		})
+	}
+}
+
+func TestOptimalGuessFrom(t *testing.T) {
+	cases := []struct {
+		solutions, guesses []string
+		want               string
+	}{{
+		solutions: []string{"bc", "cc", "da", "dc"},
+		guesses:   []string{"ab", "bb", "bc", "cc", "da", "dc"},
+		want:      "dc",
+	}, {
+		solutions: []string{"bc", "cc", "da"},
+		guesses:   []string{"ab", "bb", "bc", "bd", "cc", "da", "db"},
+		want:      "bc",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.want, func(t *testing.T) {
+			s := New(c.solutions)
+			g := New(c.guesses)
+			if want, got := c.want, s.OptimalGuessFrom(g); want != got {
 				t.Errorf("want %v; got %v", want, got)
 			}
 		})
