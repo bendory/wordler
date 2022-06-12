@@ -47,10 +47,11 @@ func main() {
 		fmt.Printf("I'll always use '%v' as my solution.\n", args.Solution)
 	}
 	if len(clGuesses) > 0 {
-		fmt.Printf("My first guesses, in order, will be %v.\n", strings.Join(clGuesses, ", "))
-		if args.Solution != "" && *iterations != 1 {
-			fmt.Println("NOTE: flags set both solution and guesses; setting iterations to 1.")
+		if *iterations != 1 && clGuesses[len(clGuesses)-1] == args.Solution {
+			fmt.Println("NOTE: last guess is solution; setting iterations to 1.")
 			*iterations = 1
+		} else {
+			fmt.Printf("My first guesses, in order, will be %v.\n", strings.Join(clGuesses, ", "))
 		}
 	}
 	fmt.Println("Ready? Here we go!")
