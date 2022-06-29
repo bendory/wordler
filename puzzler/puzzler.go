@@ -180,7 +180,7 @@ func (w *Wordle) Guess(g string) (string, error) {
 // validate guess based on `hard` setting.
 func (w *Wordle) validate(g string) error {
 	if !w.dict.Contains(g) {
-		return NotInDictionaryErr
+		return fmt.Errorf("'%s' %w", g, NotInDictionaryErr)
 	}
 	if w.Words() == 0 {
 		return NoWordsRemainingErr

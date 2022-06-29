@@ -63,7 +63,7 @@ func TestValidate(t *testing.T) {
 	if got := p.validate(list[0]); got != nil {
 		t.Errorf("want nil; got %#v", got)
 	}
-	if want, got := NotInDictionaryErr, p.validate("bogus"); want != got {
+	if want, got := NotInDictionaryErr, p.validate("bogus"); !errors.Is(got, want) {
 		t.Errorf("want %#v; got %#v", want, got)
 	}
 
@@ -134,7 +134,7 @@ func TestGuess(t *testing.T) {
 			}
 
 			response, err := p.Guess(c.guess)
-			if err != c.err {
+			if !errors.Is(err, c.err) {
 				t.Errorf("want %v; got %v", c.err, err)
 			} else if err != nil {
 				return
@@ -168,7 +168,7 @@ func TestRemaining(t *testing.T) {
 	if response != "" {
 		t.Errorf("want empty string, got %v", response)
 	}
-	if err != NotInDictionaryErr {
+	if !errors.Is(err, NotInDictionaryErr) {
 		t.Errorf("want %v, got %v", NotInDictionaryErr, err)
 	}
 
@@ -311,7 +311,7 @@ func TestSolution(t *testing.T) {
 		t.Errorf("error: %v", err)
 	}
 	args.Solution = "bogus"
-	if _, err := New(args); err != NotInDictionaryErr {
+	if _, err := New(args); !errors.Is(err, NotInDictionaryErr) {
 		t.Errorf("error: %v", err)
 	}
 }
