@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -66,19 +67,17 @@ func main() {
 		debug(-1, "Iteration %d/%d: ", i+1, *iterations)
 		p, err := puzzler.New(args)
 		if err != nil {
-			// This should never happen.
 			count.puzzlerFailures++
 			fmt.Printf("Failed to make a Puzzler: %v\n", err)
-			continue
+			os.Exit(1) // This should never happen.
 		}
 
 		var s *solver.Solver
 		if *local {
 			if s, err = solver.New(option); err != nil {
-				// This should never happen.
 				count.solverFailures++
 				fmt.Printf("Failed to make a Solver: %v\n", err)
-				continue
+				os.Exit(1) // This should never happen.
 			}
 		} else {
 			s = solver.From(wordler.Dictionary)
