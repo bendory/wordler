@@ -15,6 +15,7 @@ import (
 func main() {
 	local := flag.Bool("local_dictionary", false, "use local dictionary in place of Wordle dictionary")
 	length := flag.Int("length", wordler.DEFAULT_WORD_LENGTH, "word length")
+	guesses := flag.Uint("guesses", wordler.DEFAULT_GUESSES, "number of guesses allowed")
 	usage := flag.Usage
 	flag.Usage = func() {
 		usage()
@@ -22,7 +23,7 @@ func main() {
 	}
 	flag.Parse()
 
-	fmt.Println("I'm a wordle solver! I'll make guesses, you tell me wordle's response.")
+	fmt.Printf("I'm a wordle solver! I'll make up to %d guesses, you tell me wordle's response.\n", *guesses)
 	if *local {
 		fmt.Printf("I only allow %d-letter words found in the local dictionary.\n", *length)
 	} else if *length != wordler.DEFAULT_WORD_LENGTH && *length != 0 {
@@ -49,7 +50,7 @@ func main() {
 	}
 
 	clGuesses := flag.Args()
-	for {
+	for ; *guesses > 0; *guesses-- {
 		switch s.Remaining() {
 		case 0:
 			fmt.Println("ERROR: solver is empty.")
@@ -60,7 +61,7 @@ func main() {
 			os.Exit(0)
 
 		default:
-			fmt.Printf("I've got %d possible words left.\n", s.Remaining())
+			fmt.Printf("I've got %d possible words and %d guesses left.\n", s.Remaining(), *guesses)
 
 			var guess string
 			if len(clGuesses) > 0 {
@@ -96,4 +97,6 @@ func main() {
 			fmt.Println()
 		}
 	}
+	fmt.Println("Out of guesses :-(")
+	os.Exit(0)
 }
