@@ -50,7 +50,8 @@ func main() {
 	}
 
 	clGuesses := flag.Args()
-	for ; *guesses > 0; *guesses-- {
+GUESS:
+	for *guesses > 0 {
 		switch s.Remaining() {
 		case 0:
 			fmt.Println("ERROR: solver is empty.")
@@ -81,7 +82,7 @@ func main() {
 				case "n":
 					s.NotInWordle(guess)
 					done = true
-					continue
+					continue GUESS
 
 				case "y": // syntactic sugar for all-correct response
 					response = strings.Repeat(string(wordler.CORRECT), *length)
@@ -96,6 +97,9 @@ func main() {
 			}
 			fmt.Println()
 		}
+		// Decrement here rather than in the for loop setup so that we don't
+		// decrement when response is "n".
+		*guesses--
 	}
 	fmt.Println("Out of guesses :-(")
 	os.Exit(0)
