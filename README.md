@@ -60,8 +60,8 @@ All stats are based on 1000 6-guess iterations on 5-letter wordles.
 		* Average guesses to win: 4.36 guesses
 	* Use weighting, but use wordler's `hard mode`, which is actually easier
 	  than my initial implementation.
-	    * 88.45% success rate (over 10,000 iterations)
-		* Average guesses to win: 4.33 guesses
+	    * 89.0% success rate
+		* Average guesses to win: 4.34 guesses
 
 ## TODO
 * [ ] Optimizations.
